@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <property name="catalinaBase" value="${catalina.home:-./target/tomcat}/logs/bus"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!-- 只输出level级别以上的日志 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <!-- encoder 默认配置为PatternLayoutEncoder -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss SSS} %level %class:%line [%thread] [%X{id}] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <Append>true</Append>
+        <File>${catalinaBase}/info.log</File>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss SSS} %level %class:%line [%thread] [%X{id}] %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalinaBase}/info.log_%d{yyyy-MM-dd_HH}.log</fileNamePattern>
+            <maxHistory>72</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <Append>true</Append>
+        <File>${catalinaBase}/warn.log</File>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss SSS} %level %class:%line [%thread] [%X{id}] %msg%n</pattern>
+        </encoder>
+
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalinaBase}/warn.log_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>3</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <Append>true</Append>
+        <File>${catalinaBase}/error.log</File>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss SSS} %level %class:%line [%thread] [%X{id}] %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalinaBase}/error.log_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>3</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="STATISTIC" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <Append>true</Append>
+        <File>${catalinaBase}/statistic.log</File>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss SSS} %level %class:%line [%thread] [%X{id}] %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>info</level>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalinaBase}/statistic.log_%d{yyyy-MM-dd_HH}.log</fileNamePattern>
+            <maxHistory>72</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="statistic_log" additivity="false" level="INFO">
+        <appender-ref ref="STATISTIC"/>
+    </logger>
+
+    <root level="WARN">
+        <appender-ref ref="WARN"/>
+    </root>
+
+    <root level="info">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="INFO"/>
+        <appender-ref ref="ERROR"/>
+    </root>
+</configuration>
