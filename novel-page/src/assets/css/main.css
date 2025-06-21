@@ -1,0 +1,18 @@
+
+
+
+body {
+    font-family: common-font, sans-serif;
+}
+
+/*    字体相关*/
+/* 加载一个本地字体 */
+@font-face{
+    font-family: common-font;
+    src: url("../font/font.woff2");
+}
+
+@font-face{
+    font-family: dfdk-font;
+    src: url("../font/dfdk.woff2");
+}

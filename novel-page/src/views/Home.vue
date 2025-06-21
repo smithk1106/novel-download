@@ -1,10 +1,10 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-b from-white/80 to-blue-100/60 dark:from-black/60 dark:to-gray-900/80 font-sfpro">
+  <div class="min-h-screen bg-gradient-to-b from-white/80 to-blue-100/60 dark:from-black/60 dark:to-gray-900/80 ">
     <div class="container mx-auto px-4 py-16">
       <!-- 标���区域 - 苹果风格大标题 -->
       <div class="text-center mb-16">
-        <h1 class="text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.04)]">小说下载管理</h1>
-        <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-300 max-w-2xl mx-auto font-light">优雅而简单的小说管理工具，让阅读体验更加轻松自在</p>
+        <h1 class="text-5xl md:text-6xl  text-gray-900 dark:text-white mb-6 tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.04)]">小说下载管理</h1>
+        <p class="text-xl md:text-2xl text-gray-500 dark:text-gray-300 max-w-2xl mx-auto ">优雅而简单的小说管理工具，让阅读体验更加轻松自在</p>
       </div>
 
       <!-- 功能特点区域 - 玻璃拟态卡片 -->
@@ -16,7 +16,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">智能下载</h3>
+          <h3 class="text-xl  text-gray-900 dark:text-white mb-2">智能下载</h3>
           <p class="text-gray-500 dark:text-gray-300">支持多个小说源，自动识别章节，智能分析内容</p>
         </div>
         <!-- 功能卡片 2 -->
@@ -26,7 +26,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
             </svg>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">本地管理</h3>
+          <h3 class="text-xl  text-gray-900 dark:text-white mb-2">本地管理</h3>
           <p class="text-gray-500 dark:text-gray-300">完善的本地书库管理，支持分类、标签、收藏</p>
         </div>
         <!-- 功能卡片 3 -->
@@ -36,7 +36,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </div>
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">自动更新</h3>
+          <h3 class="text-xl  text-gray-900 dark:text-white mb-2">自动更新</h3>
           <p class="text-gray-500 dark:text-gray-300">自动检查小说更新，及时推送最新章节提醒</p>
         </div>
       </div>
@@ -45,7 +45,7 @@
       <div class="text-center space-y-4">
         <button 
           @click="handleNavigate"
-          class="glass-btn px-8 py-4 text-lg font-medium"
+          class="glass-btn px-8 py-4 text-lg "
         >
           开始使用
         </button>
@@ -66,9 +66,7 @@ const handleNavigate = () => {
 </script>
 
 <style scoped>
-.font-sfpro {
-  font-family: 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', Arial, 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-}
+
 
 .glass-card {
   @apply rounded-2xl p-8 shadow-lg transition-shadow duration-300 relative overflow-hidden;

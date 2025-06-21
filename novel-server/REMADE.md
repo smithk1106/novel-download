@@ -10,7 +10,7 @@ docker images
 ```
 ```bash
 # --name指定容器名字 -v目录挂载 -p指定端口映射  -e设置mysql参数 -d后台运行
-docker run -p 30005:30000 --name novel-download \
+docker run -p 30006:30000 --name novel-download \
 -v /Users/wangpenglong/dockerMounts/novel-download/download:/app/download \
 -v /Users/wangpenglong/dockerMounts/novel-download/db:/app/db \
 -v /Users/wangpenglong/dockerMounts/novel-download/logs:/app/logs \
@@ -26,31 +26,39 @@ docker run -p 30000:30000 --name novel-download \
 ```
 
 
-docker images
+
 
 # 推送镜像
 
 ```bash
-docker tag novel-download:latest ideaflow1/novel-download:1.0.0
+docker images
+docker tag novel-download:latest ideaflow1/novel-download:1.0.1
 
-docker push ideaflow1/novel-download:1.0.0
+docker push ideaflow1/novel-download:1.0.1
 ```
 
 #使用
 
-
-
 ```bash
-docker pull ideaflow1/novel-download:1.0.0
+docker pull ideaflow1/novel-download:1.0.1
 
 
 
 docker run -p 30000:30000 --name ideaflow1-novel-download \
--v /Users/download:/app/download \
--v /Users/novel-download/db:/app/db \
--d ideaflow1/novel-download:1.0.0
+-v /ideaflowNovelDownload/download:/app/download \
+-v /ideaflowNovelDownload/db:/app/db \
+-v /ideaflowNovelDownload/logs:/app/logs \
+-d ideaflow1/novel-download:1.0.1
 
 ```
 
-/Users/download 请更改成 你的下载小说存储的路径
-/Users/novel-download/db  请更改成 你的页面数据存储的路径
+/ideaflowNovelDownload/download 请更改成 你的下载小说存储的路径
+/ideaflowNovelDownload/db  请更改成 你的页面数据存储的路径
+/ideaflowNovelDownload/logs  请更改成 你的程序运行日志存储的路径
+
+
+MacOS的 Docker Desktop都支持buildx
+```bash
+docker buildx build --platform linux/amd64,linux/arm64 -t ideaflow1/novel-download:1.0.2  --push .
+```
+
