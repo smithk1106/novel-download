@@ -5,7 +5,10 @@ import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONUtil;
+import com.ideaflow.noveldownload.config.WebSocketContext;
 import com.ideaflow.noveldownload.novel.util.FileUtils;
+import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 import io.documentnode.epub4j.domain.*;
 import io.documentnode.epub4j.epub.EpubWriter;
 import lombok.SneakyThrows;
@@ -15,12 +18,9 @@ import java.io.FileOutputStream;
 import java.util.Date;
 import java.util.List;
 
-//import static org.fusesource.jansi.AnsiRenderer.render;
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
 
-/**
- * @author pcdd
- * Created at 2024/12/4
- */
+
 public class EpubMergeHandler implements PostProcessingHandler {
 
     public static final String COVER_NAME = "cover.html";
@@ -45,19 +45,24 @@ public class EpubMergeHandler implements PostProcessingHandler {
         meta.addTitle(b.getBookName());
         meta.setAuthors(List.of(new Author(b.getAuthor())));
         meta.addDescription(b.getIntro());
+        WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
+        String sessionId = WebSocketContext.getSessionId();
         // 下载封面失败会导致生成 epub 中断
         try {
-            Console.log("<== 正在下载封面：{}", b.getCoverUrl());
+
+
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 正在下载封面： %s...",b.getCoverUrl())));
+
             byte[] bytes = HttpUtil.downloadBytes(b.getCoverUrl());
             book.setCoverImage(new Resource(bytes, "cover.jpg"));
         } catch (Exception e) {
-//            Console.error(render("@|red 封面下载失败：{}|@"), e.getMessage());
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 封面下载失败： %s...",e.getMessage())));
         }
         // 不设置会导致 Apple Books 无法使用苹方字体
         meta.setLanguage("zh");
         meta.setDates(List.of(new io.documentnode.epub4j.domain.Date(new Date())));
         meta.addPublisher("so-novel");
-        meta.setRights(List.of("本电子书由 so-novel(https://github.com/freeok/so-novel) 制作生成。仅供交流使用，不得用于商业用途。"));
+        meta.setRights(List.of("本电子书由 Ideaflow-novel-download(https://github.com/Idea-flow/novel-download) 制作生成。仅供交流使用，不得用于商业用途。"));
 
         // content.opf > manifest
         List<File> files = FileUtils.sortFilesByName(saveDir);

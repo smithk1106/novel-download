@@ -71,7 +71,7 @@ public class WebSocketAutoConfiguration {
     // ==================== Sender 相关 ====================
 
     @Configuration
-    @ConditionalOnProperty(prefix = "wpl.websocket", name = "sender-type", havingValue = "local", matchIfMissing = true)
+    @ConditionalOnProperty(prefix = "ideaflow.websocket", name = "sender-type", havingValue = "local", matchIfMissing = true)
     public class LocalWebSocketMessageSenderConfiguration {
 
         @Bean

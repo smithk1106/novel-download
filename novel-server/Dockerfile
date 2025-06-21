@@ -1,7 +1,4 @@
-# 使用 OpenJDK 17 作为基础镜像
-#FROM openjdk:17-jdk-slim
-#FROM eclipse-temurin:17-jdk-alpine
-## AdoptOpenJDK 停止发布 OpenJDK 二进制，而 Eclipse Temurin 是它的延伸，提供更好的稳定性
+
 
 FROM eclipse-temurin:21-jre
 

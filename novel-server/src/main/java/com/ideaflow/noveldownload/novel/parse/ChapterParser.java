@@ -4,6 +4,8 @@ import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import com.ideaflow.noveldownload.config.WebSocketContext;
 import com.ideaflow.noveldownload.novel.context.BookContext;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.convert.ChapterConverter;
@@ -12,6 +14,7 @@ import com.ideaflow.noveldownload.novel.core.Source;
 import com.ideaflow.noveldownload.novel.model.*;
 import com.ideaflow.noveldownload.novel.util.CrawlUtils;
 import com.ideaflow.noveldownload.novel.util.JsoupUtils;
+import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
@@ -26,13 +29,11 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
 import static org.fusesource.jansi.AnsiRenderer.render;
 
 
-/**
- * @author pcdd
- * Created at 2024/3/27
- */
+
 public class ChapterParser extends Source {
 
     private final ChapterConverter chapterConverter;
@@ -64,7 +65,7 @@ public class ChapterParser extends Source {
         try {
             long interval = CrawlUtils.randomInterval(config);
             if (config.getShowDownloadLog() == 1) {
-                Console.log("<== 正在下载: 【{}】 间隔 {} ms", chapter.getTitle(), interval);
+//                Console.log("<== 正在下载: 【{}】 间隔 {} ms", chapter.getTitle(), interval);
             }
 
             String content = fetchContent(chapter.getUrl(), interval);
@@ -83,21 +84,22 @@ public class ChapterParser extends Source {
     }
 
     private Chapter retry(Chapter chapter, String errMsg) {
+        WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
+        String sessionId = WebSocketContext.getSessionId();
         for (int attempt = 1; attempt <= config.getMaxRetryAttempts(); attempt++) {
             try {
                 long interval = CrawlUtils.randomInterval(config, true);
-                Console.log(render("<== 【{}】下载失败，正在重试。重试次数: {}/{} 重试间隔: {} ms 原因: {}", "red"),
-                        chapter.getTitle(), attempt, config.getMaxRetryAttempts(), interval, errMsg);
 
+                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 【%s】下载失败，正在重试。重试次数: %d/%d 重试间隔: %d ms 原因: %s", chapter.getTitle(), attempt, config.getMaxRetryAttempts(), interval, errMsg)));
                 String content = fetchContent(chapter.getUrl(), interval);
                 Assert.notEmpty(content, "正文内容为空");
                 chapter.setContent(content);
 
-                Console.log(render("<== 重试成功: 【{}】", "green"), chapter.getTitle());
+                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 重试成功: 【%s】", chapter.getTitle())));
                 return chapterConverter.convert(chapter);
 
             } catch (Exception e) {
-                Console.error(render("<== 第 {} 次重试失败: 【{}】 原因: {}", "red"), attempt, chapter.getTitle(), e.getMessage());
+                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 第 %d 次重试失败: 【%s】 原因: %s", attempt, chapter.getTitle(), e.getMessage())));
                 if (attempt == config.getMaxRetryAttempts()) {
                     // 最终失败时记录日志
                     saveDownloadErrorLog(chapter, e.getMessage());

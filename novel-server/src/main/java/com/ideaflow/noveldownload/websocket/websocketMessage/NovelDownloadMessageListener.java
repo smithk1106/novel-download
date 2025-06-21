@@ -31,6 +31,8 @@ import java.io.File;
 import java.util.List;
 import java.util.Objects;
 
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
+
 
 /**
  * WebSocket 示例：单发消息
@@ -68,13 +70,13 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
             }
             HttpClientContext.set(OkHttpClientFactory.create(config, true));
             // 查找数据
-            webSocketMessageSender.send(session.getId(), "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr("<== 正在获取章节目录 ..."));
+            webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr("<== 正在获取章节目录 ..."));
 
             SearchResult searchResult = JSONUtil.toBean(searchResultEntity.getContent(), SearchResult.class);
             TocParser catalogParser = new TocParser(config);
             List<Chapter> catalogs = catalogParser.parse(searchResult.getUrl(), 1, Integer.MAX_VALUE);
             String r1 =  String.format("<== 你选择了《%s》(%s)，共计 %s 章,开始下载全本,请稍后",searchResult.getBookName(),searchResult.getAuthor(),catalogs.size());
-            webSocketMessageSender.send(session.getId(), "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr(r1));
+            webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(r1));
 
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
@@ -91,7 +93,7 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
             novelEntity.setAuthor(searchResult.getAuthor());
             novelEntity.setDownloadUrl(config.getDownloadPath()+ File.separator+searchResult.getBookName()+ "."+config.getExtName());
             novelMapper.insert(novelEntity);
-            webSocketMessageSender.send(session.getId(), "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr(String.format("<== 完成！总耗时 %s s,请取我的书库查看",NumberUtil.round(totalTimeSeconds, 2),novelEntity.getId())));
+            webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 完成！总耗时 %s s,请取我的书库查看",NumberUtil.round(totalTimeSeconds, 2),novelEntity.getId())));
         } finally {
             WebSocketContext.clearSessionId();
             WebSocketContext.clearSerder();

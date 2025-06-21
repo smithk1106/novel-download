@@ -5,12 +5,15 @@ mvn clean package -Dmaven.test.skip=true
 
 docker build -t novel-download -f Dockerfile .
 
+docker images
+
 ```
 ```bash
 # --name指定容器名字 -v目录挂载 -p指定端口映射  -e设置mysql参数 -d后台运行
-docker run -p 30000:30000 --name novel-download \
+docker run -p 30005:30000 --name novel-download \
 -v /Users/wangpenglong/dockerMounts/novel-download/download:/app/download \
 -v /Users/wangpenglong/dockerMounts/novel-download/db:/app/db \
+-v /Users/wangpenglong/dockerMounts/novel-download/logs:/app/logs \
 -d novel-download:latest
 
 docker run -p 30000:30000 --name novel-download \

@@ -2,10 +2,7 @@ package com.ideaflow.noveldownload.novel.util;
 
 import lombok.experimental.UtilityClass;
 
-/**
- * @author pcdd
- * Created at 2025/1/23
- */
+
 @UtilityClass
 public class LangType {
 

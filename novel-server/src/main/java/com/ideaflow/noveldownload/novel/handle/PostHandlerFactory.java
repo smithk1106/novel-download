@@ -3,10 +3,7 @@ package com.ideaflow.noveldownload.novel.handle;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import lombok.experimental.UtilityClass;
 
-/**
- * @author pcdd
- * Created at 2024/12/4
- */
+
 @UtilityClass
 public class PostHandlerFactory {
 

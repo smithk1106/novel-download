@@ -27,7 +27,7 @@ public class NovelDownloadApplication {
         String path = env.getProperty("server.servlet.context-path");
         path = StringUtils.hasText(path) ? path : "";
 
-        String websocketPath = env.getProperty("wpl.websocket.path");
+        String websocketPath = env.getProperty("ideaflow.websocket.path");
 
         System.out.println("\n----------------------------------------------------------\n\t" +
                 "application is running! Access URLs:\n\t" +

@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RuntimeUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
@@ -33,6 +34,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
 import static org.fusesource.jansi.AnsiRenderer.render;
 
 
@@ -59,22 +62,16 @@ public class Crawler {
     public List<SearchResult> search(String keyword) {
         WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
         String sessionId = WebSocketContext.getSessionId();
-//        webSocketMessageSender.send(sessionId, "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr(String.format("<== 开始下载《%s》（%s） 共计 %s 章 | 线程数：%s",bookName, author, catalogs.size(), autoThreads)));
 
-        webSocketMessageSender.send(sessionId, "NovelNameSearchConsoleMessageListener", JSONUtil.toJsonStr(String.format("<== 正在搜索 %s...",keyword)));
-//        Console.log("<== 正在搜索...");
+        webSocketMessageSender.send(sessionId, NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 正在搜索 %s...",keyword)));
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-//
-//        SearchResultParser searchResultParser = new SearchResultParser(config);
-//        List<SearchResult> searchResults = searchResultParser.parse(keyword);
 
         SearchParser searchResultParser = new SearchParser(config);
         List<SearchResult> searchResults = searchResultParser.parse(keyword);
 
         stopWatch.stop();
-//        webSocketMessageSender.send(sessionId, "NovelNameSearchConsoleMessageListener", JSONUtil.toJsonStr(String.format("<== 搜索到 %s 条记录，耗时 %s s", searchResults.size(), NumberUtil.round(stopWatch.getTotalTimeSeconds(), 2))));
-//        Console.log("<== 搜索到 {} 条记录，耗时 {} s", searchResults.size(), NumberUtil.round(stopWatch.getTotalTimeSeconds(), 2));
+        webSocketMessageSender.send(sessionId, NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 搜索到 %s 条记录，耗时 %s s", searchResults.size(), NumberUtil.round(stopWatch.getTotalTimeSeconds(), 2))));
 
         return searchResults;
     }
@@ -91,18 +88,15 @@ public class Crawler {
         digitCount = String.valueOf(toc.size()).length();
         Book book = new BookParser(config).parse(bookUrl);
         BookContext.set(book);
+        WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
+        String sessionId = WebSocketContext.getSessionId();
 
         // 下载临时目录名格式：书名(作者) EXT
         bookDir = FileUtils.sanitizeFileName("%s(%s) %s".formatted(book.getBookName(), book.getAuthor(), config.getExtName().toUpperCase()));
         // 必须 new File()，否则无法使用 . 和 ..
         File dir = FileUtil.mkdir(new File(config.getDownloadPath() + File.separator + bookDir));
         if (!dir.exists()) {
-            // C:\Program Files 下创建需要管理员权限
-            Console.log(render("""
-                    创建下载目录失败：%s
-                    1. 检查 config.ini 下载路径是否合法
-                    2. 尝试以管理员身份运行（部分目录需要管理员权限）
-                    """.formatted(dir), "red"));
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 创建下载目录失败:%s,请检查是否有创建文件的权限",dir.getPath())));
             return null;
         }
 
@@ -112,14 +106,10 @@ public class Crawler {
         // 阻塞主线程，用于计时
         CountDownLatch latch = new CountDownLatch(toc.size());
 
-        WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
-        String sessionId = WebSocketContext.getSessionId();
-        webSocketMessageSender.send(sessionId, "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr(String.format("<== 开始下载《%s》（%s） 共计 %s 章 | 线程数：%s",book.getBookName(), book.getAuthor(), toc.size(), autoThreads)));
+        webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 开始下载《%s》（%s） 共计 %s 章 | 线程数：%s",book.getBookName(), book.getAuthor(), toc.size(), autoThreads)));
 
-//        Console.log("<== 开始下载《{}》（{}） 共计 {} 章 | 线程数：{}", book.getBookName(), book.getAuthor(), toc.size(), autoThreads);
         if (config.getShowDownloadLog() == 0) {
-            webSocketMessageSender.send(sessionId,"NovelDownloadConsoleMessageListener", "<== 下载日志已关闭，请耐心等待...");
-//            Console.log("<== 下载日志已关闭，请耐心等待...");
+            webSocketMessageSender.send(sessionId,NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, "<== 下载日志已关闭，请耐心等待...");
         }
 
         StopWatch stopWatch = new StopWatch();
@@ -133,8 +123,7 @@ public class Crawler {
                 WebSocketContext.set(sessionId);
                 createChapterFile(chapterParser.parse(item, latch));
                 if (config.getShowDownloadLog() == 1) {
-                    webSocketMessageSender.send(sessionId,"NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr(String.format("<== 待下载章节数：%s",latch.getCount())));
-//                Console.log("<== 待下载章节数：{}", latch.getCount());
+                    webSocketMessageSender.send(sessionId,NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 待下载章节数：%s",latch.getCount())));
                 }
             } finally {
                 WebSocketContext.clearSessionId();

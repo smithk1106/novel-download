@@ -38,7 +38,7 @@ spring:
     # mode: embedded - 只初始化内存数据库，比如H2数据库
     # mode: never:  - 从不执行初始化数据库
 
-wpl:
+ideaflow:
   websocket:
     enable: true
     path: /ws

@@ -14,10 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author pcdd
- * Created at 2024/12/4
- */
+
 public class HtmlCatalogHandler implements PostProcessingHandler {
 
     @Override

@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 
-@ConfigurationProperties("wpl.websocket")
+@ConfigurationProperties("ideaflow.websocket")
 @Data
 public class WebSocketProperties {
 

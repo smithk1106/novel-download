@@ -36,7 +36,6 @@ public class CrawlerPostHandler {
         webSocketMessageSender.send(sessionId, "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr(s.append(" ...")));
 
 
-//        Console.log(s.append(" ..."));
 
         PostHandlerFactory.getHandler(extName, config).handle(book, saveDir);
     }

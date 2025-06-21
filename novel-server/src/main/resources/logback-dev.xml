@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="catalinaBase" value="${catalina.home:-./target/tomcat}/logs/bus"/>
-
+    <property name="catalinaBase" value="./logs"/>
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <!-- 只输出level级别以上的日志 -->
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
