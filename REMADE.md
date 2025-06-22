@@ -1,4 +1,13 @@
+# 项目使用技术
 
+本项目主要技术栈如下：
+
+- 前端：Vue3
+- 后端：Java17、Spring Boot3、MyBatis-plus
+- 数据库：H2（可扩展为其他数据库）,本地文件系统
+- 构建工具：Maven
+- WebSocket 实时通信
+- 容器化部署：Docker
 
 # 使用
 
