@@ -36,6 +36,24 @@ docker run -p 30000:30000 --name ideaflow1-novel-download \
 # 文档部署教程
 [部署文档地址](https://www.ideaflow.top/article/82)
 
+# 项目部分页面展示
+
+<div align="center">
+  <img src="./imgs/1.webp" alt="页面展示1" width="30%"/>
+  <img src="./imgs/2.webp" alt="页面展示2" width="30%"/>
+  <img src="./imgs/3.webp" alt="页面展示3" width="30%"/>
+</div>
+
+
+<div align="center">
+  <img src="./imgs/4.webp" alt="页面展示4" width="30%"/>
+  <img src="./imgs/5.webp" alt="页面展示5" width="30%"/>
+  <img src="./imgs/6.webp" alt="页面展示6" width="30%"/>
+</div>
+
+
+
+
 
 # 参考开源项目
  [so-novel](https://github.com/freeok/so-novel)
