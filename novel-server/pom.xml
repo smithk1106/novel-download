@@ -6,19 +6,17 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.4.1</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
     <groupId>com.ideaflow.novelDownload</groupId>
 
     <version>0.0.1-SNAPSHOT</version>
 
     <artifactId>novel-download-server</artifactId>
-    <!--    <packaging>pom</packaging>  如果是pom 会找不到配置文件 -->
-    <packaging>jar</packaging> <!-- 2. 新增 packaging 为 jar -->
+    <packaging>jar</packaging>
+    <name>novel-download-server</name>
 
-    <name>novel-download-server</name> <!-- 3. 新增 name 为 ${project.artifactId} -->
-
-    <description> <!-- 4. 新增 description 为该模块的描述 -->
+    <description>
         novel-download-server
     </description>
 

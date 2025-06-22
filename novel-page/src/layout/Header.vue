@@ -6,11 +6,8 @@
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <router-link to="/" class="flex items-center space-x-2 hover:opacity-80 transition-opacity logo-link">
-          <svg class="w-8 h-8 text-blue-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 4.75L19.25 9L12 13.25L4.75 9L12 4.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M4.75 15L12 19.25L19.25 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          <span class="text-xl font-semibold text-gray-900">小说下载器</span>
+          <img src="/public/icon-192.png" alt="Logo" class="w-8 h-8" />
+          <span class="text-xl font-semibold text-gray-900">小说搜索下载</span>
         </router-link>
 
         <!-- Navigation Links -->
