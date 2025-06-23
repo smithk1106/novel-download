@@ -20,11 +20,62 @@
                   <input v-model="config.version" type="text" disabled />
                 </div>
               </div>
-              <div class="form-group">
-                <label class="form-label">书源ID</label>
-                <div class="glass-input">
-                  <input v-model="config.sourceId" type="number" />
+              <div class="form-group relative" id="source-multiselect">
+                <label class="form-label">书源ID（多选）</label>
+                <!-- 选中项展示区 -->
+                <div
+                  class="flex flex-wrap items-center min-h-[40px] border rounded-lg px-2 py-1 bg-white cursor-pointer"
+                  @click="dropdownOpen = !dropdownOpen"
+                >
+                  <template v-if="selectedSourceIds.length">
+                    <span
+                      v-for="id in selectedSourceIds"
+                      :key="id"
+                      class="bg-blue-100 text-blue-700 rounded px-2 py-0.5 mr-1 mb-1 text-xs flex items-center"
+                    >
+                      {{ id }}
+                      <span
+                        class="ml-1 cursor-pointer hover:text-red-500"
+                        @click.stop="removeId(id)"
+                      >×</span>
+                    </span>
+                  </template>
+                  <span v-else class="text-gray-400">请选择书源ID</span>
+                  <span class="ml-auto text-gray-400">
+                    <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                  </span>
                 </div>
+                <!-- 下拉选项区 -->
+                <div
+                  v-if="dropdownOpen"
+                  class="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-auto"
+                  @mousedown.stop
+                >
+                  <div
+                    class="px-3 py-2 hover:bg-blue-50 cursor-pointer font-bold text-blue-600"
+                    @click.stop="toggleSelectAll"
+                  >
+                    {{ isAllSelected ? '取消全选' : '全选' }}
+                  </div>
+                  <div
+                    v-for="source in sourceInfo"
+                    :key="source.id"
+                    class="px-3 py-2 hover:bg-blue-50 cursor-pointer flex items-center"
+                    @click.stop
+                  >
+                    <input
+                      type="checkbox"
+                      class="mr-2"
+                      :value="String(source.id)"
+                      v-model="selectedSourceIds"
+                      @click.stop
+                    />
+                    <span @click="toggleId(source.id)">{{ source.id }}</span>
+                  </div>
+                </div>
+                <p class="form-hint">可多选，保存时会以逗号分隔</p>
               </div>
               <div class="form-group">
                 <label class="form-label">下载路径</label>
@@ -305,7 +356,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick, computed, onUnmounted } from 'vue'
 import { API_URLS, getFullUrl } from '@/config/api'
 
 const config = ref({})
@@ -316,6 +367,19 @@ const toast = ref({
   type: 'success',
   message: ''
 })
+const selectedSourceIds = ref([])
+const dropdownOpen = ref(false)
+
+// 解析 manySourceId 字符串为数组
+const parseManySourceId = (str) => {
+  if (!str) return []
+  return str.split(',').map(s => s.trim()).filter(Boolean)
+}
+
+// 组装数组为字符串
+const joinManySourceId = (arr) => {
+  return arr.filter(Boolean).join(',')
+}
 
 // 显示提示
 const showToast = (message, type = 'success') => {
@@ -338,6 +402,7 @@ const fetchConfig = async () => {
     const result = await response.json()
     if (result.code === 200) {
       config.value = result.data
+      selectedSourceIds.value = parseManySourceId(config.value.manySourceId)
     } else {
       showToast(result.msg || '获取配置失败', 'error')
     }
@@ -360,11 +425,15 @@ const fetchConfig = async () => {
 // 保存配置
 const saveConfig = async () => {
   try {
-    // 首先验证书源ID
-    if (!isValidSourceId(config.value.sourceId)) {
-      showToast(`数据源ID ${config.value.sourceId} 不存在`, 'error')
+    // 校验选中的 id 是否都在 sourceInfo 里
+    const allValid = selectedSourceIds.value.every(id =>
+      sourceInfo.value.some(source => String(source.id) === String(id))
+    )
+    if (!allValid) {
+      showToast('存在无效的数据源ID', 'error')
       return
     }
+    config.value.manySourceId = joinManySourceId(selectedSourceIds.value)
     isSaving.value = true
     const response = await fetch(getFullUrl(API_URLS.CONFIG.UPDATE), {
       method: 'POST',
@@ -387,8 +456,50 @@ const saveConfig = async () => {
   }
 }
 
+// 移除单个id
+const removeId = (id) => {
+  selectedSourceIds.value = selectedSourceIds.value.filter(i => i !== String(id))
+}
+
+// 切换单个id选中
+const toggleId = (id) => {
+  id = String(id)
+  if (selectedSourceIds.value.includes(id)) {
+    selectedSourceIds.value = selectedSourceIds.value.filter(i => i !== id)
+  } else {
+    selectedSourceIds.value.push(id)
+  }
+}
+
+// 判断是否全选
+const isAllSelected = computed(() =>
+  sourceInfo.value.length > 0 &&
+  selectedSourceIds.value.length === sourceInfo.value.length
+)
+
+// 一键全选/全不选
+const toggleSelectAll = () => {
+  if (isAllSelected.value) {
+    selectedSourceIds.value = []
+  } else {
+    selectedSourceIds.value = sourceInfo.value.map(s => String(s.id))
+  }
+}
+
+// 点击外部关闭下拉
+const handleClickOutside = (event) => {
+  const dropdown = document.getElementById('source-multiselect')
+  if (dropdown && !dropdown.contains(event.target)) {
+    dropdownOpen.value = false
+  }
+}
+
 onMounted(() => {
   fetchConfig()
+  document.addEventListener('mousedown', handleClickOutside)
+})
+onUnmounted(() => {
+  document.removeEventListener('mousedown', handleClickOutside)
 })
 
 // 状态样式处理
@@ -403,11 +514,6 @@ const getStatusClass = (status) => {
 const getStatusText = (status) => {
   if (status === null) return '未知'
   return status ? '支持' : '不支持'
-}
-
-// 检查书源ID是否有效
-const isValidSourceId = (id) => {
-  return sourceInfo.value.some(source => source.id === id)
 }
 </script>
 
@@ -675,3 +781,6 @@ const isValidSourceId = (id) => {
   100% { transform: rotate(360deg); }
 }
 </style>
+
+
+

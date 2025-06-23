@@ -11,6 +11,7 @@ public class AppConfig {
     private String language;
     private Integer searchLimit; //搜索限制 默认20条
     private Integer sourceId; //书源id
+    private String manySourceId; //书源id
     private String downloadPath; // # 下载路径，绝对相对均可 (Windows 路径分隔符不要用 \ ，用 \\ 或 /)
     private String extName; // 文件扩展名，支持 epub、txt、html，推荐 epub
     private Integer autoUpdate; // 启动时是否自动更新 (1 开，0 关)

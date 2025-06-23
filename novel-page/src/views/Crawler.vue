@@ -235,14 +235,63 @@ onUnmounted(() => {
                     </svg>
                   </button>
                 </div>
-                <select
-                  v-model="searchType"
-                  class="w-full sm:w-auto px-6 py-4 bg-white/10 backdrop-blur-sm border-0 rounded-2xl text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:bg-white/20 transition-all duration-300 appearance-none cursor-pointer pr-12"
-                  style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23666%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;"
-                >
-                  <option value="fuzzy">模糊搜索</option>
-                  <option value="exact">精确搜索</option>
-                </select>
+                <div class="form-group relative">
+                  <label class="form-label">书源ID（多选）</label>
+                  <!-- 选中项展示区 -->
+                  <div
+                    class="flex flex-wrap items-center min-h-[40px] border rounded-lg px-2 py-1 bg-white cursor-pointer"
+                    @click="dropdownOpen = !dropdownOpen"
+                    tabindex="0"
+                    @blur="dropdownOpen = false"
+                  >
+                    <template v-if="selectedSourceIds.length">
+                      <span
+                        v-for="id in selectedSourceIds"
+                        :key="id"
+                        class="bg-blue-100 text-blue-700 rounded px-2 py-0.5 mr-1 mb-1 text-xs flex items-center"
+                      >
+                        {{ id }}
+                        <span
+                          class="ml-1 cursor-pointer hover:text-red-500"
+                          @click.stop="removeId(id)"
+                        >×</span>
+                      </span>
+                    </template>
+                    <span v-else class="text-gray-400">请选择书源ID</span>
+                    <span class="ml-auto text-gray-400">
+                      <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                      </svg>
+                    </span>
+                  </div>
+                  <!-- 下拉选项区 -->
+                  <div
+                    v-if="dropdownOpen"
+                    class="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-auto"
+                  >
+                    <div
+                      class="px-3 py-2 hover:bg-blue-50 cursor-pointer font-bold text-blue-600"
+                      @click="toggleSelectAll"
+                    >
+                      {{ isAllSelected ? '取消全选' : '全选' }}
+                    </div>
+                    <div
+                      v-for="source in sourceInfo"
+                      :key="source.id"
+                      class="px-3 py-2 hover:bg-blue-50 cursor-pointer flex items-center"
+                      @click="toggleId(source.id)"
+                    >
+                      <input
+                        type="checkbox"
+                        class="mr-2"
+                        :checked="selectedSourceIds.includes(String(source.id))"
+                        @change.prevent
+                      />
+                      <span>{{ source.id }}</span>
+                    </div>
+                  </div>
+                  <p class="form-hint">可多选，保存时会以逗号分隔</p>
+                </div>
               </div>
             </div>
           </div>
