@@ -24,19 +24,21 @@
                 <label class="form-label">书源ID（多选）</label>
                 <!-- 选中项展示区 -->
                 <div
-                  class="flex flex-wrap items-center min-h-[40px] border rounded-lg px-2 py-1 bg-white cursor-pointer"
+                  class="flex flex-wrap items-center min-h-[40px] glass-input glass-multiselect px-2 py-1 cursor-pointer transition-all duration-200"
                   @click="dropdownOpen = !dropdownOpen"
+                  :class="{'ring-2 ring-blue-300': dropdownOpen}"
                 >
                   <template v-if="selectedSourceIds.length">
                     <span
                       v-for="id in selectedSourceIds"
                       :key="id"
-                      class="bg-blue-100 text-blue-700 rounded px-2 py-0.5 mr-1 mb-1 text-xs flex items-center"
+                      class="glass-tag-read flex items-center mr-2 mb-2"
                     >
-                      {{ id }}
+                      <span class="mr-1">{{ id }}</span>
                       <span
-                        class="ml-1 cursor-pointer hover:text-red-500"
+                        class="ml-1 cursor-pointer hover:text-gray-500 text-base font-bold"
                         @click.stop="removeId(id)"
+                        title="移除"
                       >×</span>
                     </span>
                   </template>
@@ -50,11 +52,11 @@
                 <!-- 下拉选项区 -->
                 <div
                   v-if="dropdownOpen"
-                  class="absolute z-10 mt-1 w-full bg-white border rounded-lg shadow-lg max-h-60 overflow-auto"
+                  class="absolute z-20 mt-1 w-full glass-dropdown border rounded-xl shadow-2xl max-h-60 overflow-auto backdrop-blur-lg bg-white/60"
                   @mousedown.stop
                 >
                   <div
-                    class="px-3 py-2 hover:bg-blue-50 cursor-pointer font-bold text-blue-600"
+                    class="px-3 py-2 hover:bg-blue-100/60 cursor-pointer font-bold text-blue-600 rounded-t-xl transition-all"
                     @click.stop="toggleSelectAll"
                   >
                     {{ isAllSelected ? '取消全选' : '全选' }}
@@ -62,17 +64,17 @@
                   <div
                     v-for="source in sourceInfo"
                     :key="source.id"
-                    class="px-3 py-2 hover:bg-blue-50 cursor-pointer flex items-center"
-                    @click.stop
+                    class="px-3 py-2 hover:bg-blue-100/60 cursor-pointer flex items-center transition-all select-none"
+                    @click.stop="toggleId(source.id)"
                   >
                     <input
                       type="checkbox"
-                      class="mr-2"
+                      class="mr-2 accent-blue-500 rounded focus:ring-2 focus:ring-blue-300"
                       :value="String(source.id)"
                       v-model="selectedSourceIds"
                       @click.stop
                     />
-                    <span @click="toggleId(source.id)">{{ source.id }}</span>
+                    <span>{{ source.id }}</span>
                   </div>
                 </div>
                 <p class="form-hint">可多选，保存时会以逗号分隔</p>
@@ -779,6 +781,42 @@ const getStatusText = (status) => {
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+.glass-multiselect {
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.8);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1.5px 4px rgba(0,0,0,0.03), inset 0 0 0 1px rgba(255,255,255,0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.glass-dropdown {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.8);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10), 0 1.5px 4px rgba(0,0,0,0.03), inset 0 0 0 1px rgba(255,255,255,0.4);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.glass-tag-read {
+  background: rgba(240, 245, 255, 0.85);
+  border-radius: 16px;
+  border: 1px solid rgba(180,200,230,0.25);
+  box-shadow: 0 1px 4px rgba(180,200,230,0.06);
+  color: #34495e;
+  padding: 6px 16px 6px 12px;
+  margin-right: 8px;
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, color 0.2s;
+  line-height: 1.6;
+}
+.glass-tag-read:hover {
+  background: rgba(200,220,255,0.18);
+  color: #222;
 }
 </style>
 
