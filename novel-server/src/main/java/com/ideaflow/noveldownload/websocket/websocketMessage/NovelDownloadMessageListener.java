@@ -25,9 +25,11 @@ import com.ideaflow.noveldownload.websocket.websocketcore.listener.WebSocketMess
 import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -65,17 +67,17 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
                 webSocketMessageSender.send(session.getId(), "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr("数据为空,请重新尝试搜索:id:"+message.getSearchResultId()));
                 return;
             }
-            if (Objects.isNull(config.getSourceId()))   {
-                config.setSourceId(searchResultEntity.getSourceId());
-            }
+            config.setSourceId(searchResultEntity.getSourceId());
             HttpClientContext.set(OkHttpClientFactory.create(config, true));
+
+
             // 查找数据
             webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr("<== 正在获取章节目录 ..."));
 
             SearchResult searchResult = JSONUtil.toBean(searchResultEntity.getContent(), SearchResult.class);
             TocParser catalogParser = new TocParser(config);
             List<Chapter> catalogs = catalogParser.parse(searchResult.getUrl(), 1, Integer.MAX_VALUE);
-            String r1 =  String.format("<== 你选择了《%s》(%s)，共计 %s 章,开始下载全本,请稍后",searchResult.getBookName(),searchResult.getAuthor(),catalogs.size());
+            String r1 =  String.format("<== 你选择了《%s》(%s)，共计 %s 章 数据源:%s %s,开始下载全本,请稍后",searchResult.getBookName(),searchResult.getAuthor(),catalogs.size(),config.getSourceId(),searchResult.getUrl());
             webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(r1));
 
             StopWatch stopWatch = new StopWatch();

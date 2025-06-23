@@ -24,7 +24,7 @@
                 <label class="form-label">书源ID（多选）</label>
                 <!-- 选中项展示区 -->
                 <div
-                  class="flex flex-wrap items-center min-h-[40px] glass-input glass-multiselect px-2 py-1 cursor-pointer transition-all duration-200"
+                  class="flex flex-wrap items-center min-h-[20px] glass-input glass-multiselect px-2 py-1 cursor-pointer transition-all duration-200"
                   @click="dropdownOpen = !dropdownOpen"
                   :class="{'ring-2 ring-blue-300': dropdownOpen}"
                 >
@@ -77,7 +77,6 @@
                     <span>{{ source.id }}</span>
                   </div>
                 </div>
-                <p class="form-hint">可多选，保存时会以逗号分隔</p>
               </div>
               <div class="form-group">
                 <label class="form-label">下载路径</label>
@@ -801,18 +800,18 @@ const getStatusText = (status) => {
 }
 .glass-tag-read {
   background: rgba(240, 245, 255, 0.85);
-  border-radius: 16px;
-  border: 1px solid rgba(180,200,230,0.25);
-  box-shadow: 0 1px 4px rgba(180,200,230,0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(180,200,230,0.18);
+  box-shadow: 0 1px 2px rgba(180,200,230,0.04);
   color: #34495e;
-  padding: 6px 16px 6px 12px;
-  margin-right: 8px;
-  margin-bottom: 8px;
-  font-size: 16px;
+  padding: 2px 8px 2px 8px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.2px;
   transition: background 0.2s, color 0.2s;
-  line-height: 1.6;
+  line-height: 1.4;
 }
 .glass-tag-read:hover {
   background: rgba(200,220,255,0.18);

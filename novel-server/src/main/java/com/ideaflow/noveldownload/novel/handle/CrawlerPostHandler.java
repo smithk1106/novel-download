@@ -21,26 +21,6 @@ public class CrawlerPostHandler {
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("txt", "epub", "pdf");
     private final AppConfig config;
 
-    public void handle(Book book, File saveDir) {
-        String extName = config.getExtName();
-        StringBuilder s = new StringBuilder(StrUtil.format("\n<== 《{}》（{}）下载完毕，", book.getBookName(), book.getAuthor()));
-
-        if (extName.matches("txt|epub")) {
-            s.append("正在合并为 ").append(extName.toUpperCase());
-        }
-        if ("html".equals(extName)) {
-            s.append("正在生成 HTML 目录文件");
-        }
-        WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
-        String sessionId = WebSocketContext.getSessionId();
-        webSocketMessageSender.send(sessionId, "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr(s.append(" ...")));
-
-
-
-        PostHandlerFactory.getHandler(extName, config).handle(book, saveDir);
-    }
-
-
     @SneakyThrows
     public void handle(File saveDir) {
         Book book = BookContext.get();

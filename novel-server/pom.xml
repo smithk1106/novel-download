@@ -22,7 +22,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <hutool.version>5.8.26</hutool.version>
+        <hutool.version>5.8.37</hutool.version>
         <javet.version>4.1.3</javet.version>
     </properties>
     <dependencies>

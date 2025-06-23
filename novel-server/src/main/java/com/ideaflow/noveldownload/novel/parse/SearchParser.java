@@ -9,6 +9,8 @@ import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
 
+import cn.hutool.json.JSONUtil;
+import com.ideaflow.noveldownload.config.WebSocketContext;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.convert.ChineseConverter;
 import com.ideaflow.noveldownload.novel.core.Source;
@@ -16,6 +18,7 @@ import com.ideaflow.noveldownload.novel.handle.SearchResultsHandler;
 import com.ideaflow.noveldownload.novel.model.*;
 import com.ideaflow.noveldownload.novel.util.CrawlUtils;
 import com.ideaflow.noveldownload.novel.util.JsoupUtils;
+import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 import lombok.SneakyThrows;
 
 import okhttp3.OkHttpClient;
@@ -28,6 +31,7 @@ import org.jsoup.select.Elements;
 
 import java.util.*;
 
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
 import static org.fusesource.jansi.AnsiRenderer.render;
 /**
  * 搜索解析器，负责处理搜索请求和结果解析
@@ -52,9 +56,10 @@ public class SearchParser extends Source {
     @SneakyThrows
     public List<SearchResult> parse(String keyword) {
         Rule.Search r = this.rule.getSearch();
-
+        WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
+        String sessionId = WebSocketContext.getSessionId();
         if (r == null) {
-            Console.log(render("<== 书源 {} 不支持搜索", "yellow"), config.getSourceId());
+            webSocketMessageSender.send(sessionId, NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 书源 %s 不支持搜索", config.getSourceId())));
             return Collections.emptyList();
         }
         if (this.rule.isDisabled()) {
@@ -78,8 +83,11 @@ public class SearchParser extends Source {
             document = Jsoup.parse(resp.peekBody(Long.MAX_VALUE).string(), r.getBaseUri());
 
         } catch (Exception e) {
-            Console.error(render("<== 书源 {} ({}) 搜索解析出错: {}", "red"),
-                    this.rule.getId(), this.rule.getName(), e.getMessage());
+            String errorMsg = e.getMessage();
+            if (errorMsg != null && (errorMsg.toLowerCase().contains("timeout") || errorMsg.toLowerCase().contains("timed out"))) {
+                errorMsg += "，建议更换网络环境后重试";
+            }
+            webSocketMessageSender.send(sessionId, NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 书源 %s  (%s ) 搜索解析出错: %s ", this.rule.getId(), this.rule.getName(), errorMsg)));
             return Collections.emptyList();
         }
 

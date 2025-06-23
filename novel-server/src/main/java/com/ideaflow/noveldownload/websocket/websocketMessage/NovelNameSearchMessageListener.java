@@ -18,6 +18,7 @@ import com.ideaflow.noveldownload.websocket.websocketcore.listener.WebSocketMess
 import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.List;
@@ -58,6 +59,20 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
         WebSocketContext.setSender(webSocketMessageSender);
         WebSocketContext.set(session.getId());
 
+        String manySourceId = config.getManySourceId();
+        if (StringUtils.hasText(manySourceId)){
+            for (String sourceId : manySourceId.split(",")) {
+                config.setSourceId(Integer.parseInt(sourceId));
+                dealSingleSourceSearch(config, session, message, isExact);
+            }
+        }
+
+
+
+    }
+
+    private void dealSingleSourceSearch(AppConfig config,WebSocketSession session, NameSearchSendMessage message, boolean isExact) {
+
         webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 数据源:%s", config.getSourceId())));
         // 查找数据
         List<SearchResult> results = new Crawler(config).search(message.getBookName());
@@ -88,10 +103,8 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
                 webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_RESULT_MESSAGE_LISTENER, JSONUtil.toJsonStr(searchResultEntity));
             }
         }else {
-            webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr("<== 搜索完成,未查询到"));
+            webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 数据源id:%s,搜索完成,未查询到",config.getSourceId())));
         }
-
-
     }
 
     @Override

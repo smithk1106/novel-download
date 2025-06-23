@@ -1,6 +1,7 @@
 package com.ideaflow.noveldownload.novel.convert;
 
 import com.hankcs.hanlp.HanLP;
+
 import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.model.SearchResult;
@@ -9,8 +10,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.function.Function;
 
-/** * 中文转换工具类，用于简体繁体转换
- */
+
 @UtilityClass
 public class ChineseConverter {
 
