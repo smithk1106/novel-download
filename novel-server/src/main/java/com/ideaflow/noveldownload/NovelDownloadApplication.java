@@ -28,12 +28,14 @@ public class NovelDownloadApplication {
         path = StringUtils.hasText(path) ? path : "";
 
         String websocketPath = env.getProperty("ideaflow.websocket.path");
+        String h2 = "/h2-console";
 
         System.out.println("\n----------------------------------------------------------\n\t" +
                 "application is running! Access URLs:\n\t" +
                 "Local: \t\thttp://localhost:" + port + path + "/\n\t" +
                 "前端页面: \thttp://" + ip + ":" + port + path + "/\n\t" +
                 "websocketPath: \thttp://" + ip + ":" + port + websocketPath + "/\n\t" +
+                "/h2-console: \thttp://" + ip + ":" + port + h2 + "/\n\t" +
                 "----------------------------------------------------------");
     }
 

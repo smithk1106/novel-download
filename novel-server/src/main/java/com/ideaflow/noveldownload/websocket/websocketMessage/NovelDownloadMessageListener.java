@@ -3,6 +3,7 @@ package com.ideaflow.noveldownload.websocket.websocketMessage;
 
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ideaflow.noveldownload.config.WebSocketContext;
 import com.ideaflow.noveldownload.entity.AppConfigEntity;
@@ -19,6 +20,7 @@ import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.model.SearchResult;
 import com.ideaflow.noveldownload.novel.parse.TocParser;
+import com.ideaflow.noveldownload.novel.util.FileUtils;
 import com.ideaflow.noveldownload.websocket.config.WebSocketThreadLocal;
 import com.ideaflow.noveldownload.websocket.websocketMessage.message.DownloadSendMessage;
 import com.ideaflow.noveldownload.websocket.websocketcore.listener.WebSocketMessageListener;
@@ -76,7 +78,39 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
 
             SearchResult searchResult = JSONUtil.toBean(searchResultEntity.getContent(), SearchResult.class);
             TocParser catalogParser = new TocParser(config);
+
             List<Chapter> catalogs = catalogParser.parse(searchResult.getUrl(), 1, Integer.MAX_VALUE);
+
+
+            List<Chapter> downloadCatalogs = new ArrayList<>();
+            if (message.getDownloadType() == null || message.getDownloadType() == 0) {
+                // 默认下载全部
+                downloadCatalogs.addAll(catalogs);
+            } else if (message.getDownloadType() == 1) {
+                int start = message.getStartChapter() != null ? message.getStartChapter() : 1;
+                int end = message.getEndChapter() != null ? message.getEndChapter() : catalogs.size();
+                start = Math.min(start, catalogs.size());
+                end = Math.min(catalogs.size(), end);
+                if (start < 1  || start > end) {
+                    webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr("章节范围参数不合法，请检查后重试。"));
+                    return;
+                }
+                start = Math.max(1, start);
+                downloadCatalogs.addAll(catalogs.subList(start - 1, end));
+            } else if (message.getDownloadType() == 2) {
+                // 下载最新章节
+                int count = message.getLatestChapterCount() != null ? message.getLatestChapterCount() : 1;
+                count = Math.min(count, catalogs.size());
+                if (count < 1 ) {
+                    webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr("最新章节数量参数不合法，请检查后重试。"));
+                    return;
+                }
+                if (count > 0) {
+                    downloadCatalogs.addAll(catalogs.subList(catalogs.size() - count, catalogs.size()));
+                }
+            }
+
+
             String r1 =  String.format("<== 你选择了《%s》(%s)，共计 %s 章 数据源:%s %s,开始下载全本,请稍后",searchResult.getBookName(),searchResult.getAuthor(),catalogs.size(),config.getSourceId(),searchResult.getUrl());
             webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(r1));
 
@@ -86,14 +120,16 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
             WebSocketContext.setSender(webSocketMessageSender);
             WebSocketContext.set(session.getId());
 
-            Book book = new Crawler(config).crawl(searchResult.getUrl(), catalogs);
+            Book book = new Crawler(config).crawl(searchResult.getUrl(), downloadCatalogs);
             stopWatch.stop();
             double totalTimeSeconds = stopWatch.getTotalTimeSeconds();
             NovelEntity novelEntity = new NovelEntity();
             novelEntity.setName(searchResult.getBookName());
             novelEntity.setCover(book.getCoverUrl());
             novelEntity.setAuthor(searchResult.getAuthor());
-            novelEntity.setDownloadUrl(config.getDownloadPath()+ File.separator+searchResult.getBookName()+ "."+config.getExtName());
+            String bookDir = StrUtil.format("{}({}).{}" , book.getBookName(), book.getAuthor(),config.getExtName().toLowerCase());
+            novelEntity.setDownloadUrl(config.getDownloadPath()+ File.separator+bookDir);
+
             novelMapper.insert(novelEntity);
             webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 完成！总耗时 %s s,请取我的书库查看",NumberUtil.round(totalTimeSeconds, 2),novelEntity.getId())));
         } finally {

@@ -5,7 +5,6 @@ import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.io.file.FileWriter;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.http.HttpUtil;
 import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.util.FileUtils;
 
@@ -15,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class HtmlCatalogHandler implements PostProcessingHandler {
+public class HtmlTocHandler implements PostProcessingHandler {
 
     @Override
     public void handle(Book book, File saveDir) {
@@ -23,8 +22,9 @@ public class HtmlCatalogHandler implements PostProcessingHandler {
         String regex = "<title>(.*?)</title>";
 
         strings.add("文件名\t\t章节名");
-        int i = 1;
-        for (File file : FileUtils.sortFilesByName(saveDir)) {
+        List<File> files = FileUtils.sortFilesByName(saveDir);
+        int i = Integer.parseInt(StrUtil.subBefore(files.get(0).getName(), "_", false));
+        for (File file : files) {
             FileReader fr = FileReader.create(file, StandardCharsets.UTF_8);
             // 获取 <title> 内容
             String title = ReUtil.getGroup1(regex, fr.readString());
@@ -35,9 +35,7 @@ public class HtmlCatalogHandler implements PostProcessingHandler {
         FileWriter fw = FileWriter.create(file, StandardCharsets.UTF_8);
         fw.writeLines(strings);
 
-        // 下载封面
-        File coverFile = HttpUtil.downloadFileFromUrl(book.getCoverUrl(), System.getProperty("user.dir") + File.separator + saveDir);
-        FileUtil.rename(coverFile, "0_封面." + FileUtil.getType(coverFile), true);
+        downloadCover(book, saveDir);
     }
 
 }

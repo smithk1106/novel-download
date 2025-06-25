@@ -1,15 +1,15 @@
 // API 基础配置
-// const protocolUrl = window.location.protocol === 'https:' ? 'https://novel.x.com/api' : 'http://127.0.0.1:30000/api';
+const protocolUrl = window.location.protocol === 'https:' ? 'https://novel.x.com/api' : 'http://127.0.0.1:30000/api';
 
-const protocolUrl = `${window.location.protocol}//${window.location.host}/api`;
+// const protocolUrl = `${window.location.protocol}//${window.location.host}/api`;
 
 // console.log('API_BASE_URL:', protocolUrl);
 
 export const API_BASE_URL = `${protocolUrl}`;
 
 // WebSocket 配置
-// const websocketProtocolUrl = window.location.protocol === 'https:' ? 'wss://novel.x.com/ws' : 'ws://127.0.0.1:30000/ws';
-const websocketProtocolUrl = window.location.protocol === 'https:' ? `wss://${window.location.host}/ws` : `ws://${window.location.host}/ws`;
+const websocketProtocolUrl = window.location.protocol === 'https:' ? 'wss://novel.x.com/ws' : 'ws://127.0.0.1:30000/ws';
+// const websocketProtocolUrl = window.location.protocol === 'https:' ? `wss://${window.location.host}/ws` : `ws://${window.location.host}/ws`;
 
 
 // console.log('websocketProtocolUrl:', websocketProtocolUrl);

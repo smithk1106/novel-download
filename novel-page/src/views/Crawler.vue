@@ -193,6 +193,75 @@ onUnmounted(() => {
     ws.close()
   }
 })
+
+
+
+
+// 下载配置相关
+const showDownloadModal = ref(false)
+const selectedNovel = ref({})
+const downloadActiveTab = ref(0)
+const downloadTabs = [
+  { label: '全本下载', type: 0 },
+  { label: '指定章节', type: 1 },
+  { label: '最新章节', type: 2 }
+]
+const downloadConfig = ref({
+  startChapter: 1,
+  endChapter: 100,
+  latestChapterCount: 10
+})
+
+// 打开下载配置弹窗
+const openDownloadModal = (novel) => {
+  selectedNovel.value = novel
+  showDownloadModal.value = true
+  // 重置配置
+  downloadActiveTab.value = 0
+  downloadConfig.value = {
+    startChapter: 1,
+    endChapter: 100,
+    latestChapterCount: 10
+  }
+}
+
+// 关闭下载配置弹窗
+const closeDownloadModal = () => {
+  showDownloadModal.value = false
+}
+
+// 选择下载类型标签
+const selectDownloadTab = (index) => {
+  downloadActiveTab.value = index
+}
+
+// 确认下载
+const confirmDownload = () => {
+  const downloadType = downloadTabs[downloadActiveTab.value].type
+
+  const downloadParams = {
+    searchResultId: selectedNovel.value.id,
+    downloadType: downloadType
+  }
+
+  // 根据选择的类型添加额外参数
+  if (downloadType === 1) { // 指定章节
+    downloadParams.startChapter = parseInt(downloadConfig.value.startChapter) || 1
+    downloadParams.endChapter = parseInt(downloadConfig.value.endChapter) || 100
+  } else if (downloadType === 2) { // 最新章节
+    downloadParams.latestChapterCount = parseInt(downloadConfig.value.latestChapterCount) || 10
+  }
+
+  // 发送下载请求
+  ws.send(JSON.stringify({
+    type: 'NovelDownloadMessageListener',
+    content: downloadParams
+  }))
+
+  // 关闭弹窗
+  closeDownloadModal()
+}
+
 </script>
 
 <template>
@@ -287,8 +356,8 @@ onUnmounted(() => {
                       </div>
                     </div>
                     <button
-                      @click="downloadNovel(message.content)"
-                      class="flex-shrink-0 bg-gradient-to-r from-green-400 to-green-600 text-white px-4 py-2 rounded-lg font-medium hover:from-green-500 hover:to-green-700 transition-all duration-300"
+                        @click="openDownloadModal(message.content)"
+                        class="flex-shrink-0 bg-gradient-to-r from-purple-400 to-indigo-500 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-500 hover:to-indigo-600 transition-all duration-300"
                     >
                       抓取
                     </button>
@@ -348,6 +417,95 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 下载配置弹窗 -->
+  <div v-if="showDownloadModal" class="fixed inset-0 z-50 flex items-center justify-center">
+    <!-- 背景遮罩 -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeDownloadModal"></div>
+
+    <!-- 弹窗内容 - 液态玻璃风格 -->
+    <div class="relative w-full max-w-md mx-4 bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="p-6">
+        <h3 class="text-xl font-semibold text-slate-800 mb-4">下载设置</h3>
+
+        <!-- 标签页切换 -->
+        <div class="flex border-b border-white/30 mb-6">
+          <button
+              v-for="(tab, index) in downloadTabs"
+              :key="index"
+              @click="selectDownloadTab(index)"
+              class="px-4 py-2 font-medium text-sm transition-all duration-300"
+              :class="downloadActiveTab === index ?
+            'border-b-2 border-purple-500 text-purple-700' :
+            'text-slate-600 hover:text-purple-500'"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <!-- 全本下载 -->
+        <div v-if="downloadActiveTab === 0" class="space-y-4">
+          <p class="text-slate-700">将下载《{{ selectedNovel.title }}》的全部章节</p>
+        </div>
+
+        <!-- 指定章节下载 -->
+        <div v-else-if="downloadActiveTab === 1" class="space-y-4">
+          <div class="flex space-x-4">
+            <div class="w-1/2">
+              <label class="block text-sm text-slate-600 mb-1">开始章节</label>
+              <input
+                  v-model="downloadConfig.startChapter"
+                  type="number"
+                  min="1"
+                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                  placeholder="开始章节"
+              />
+            </div>
+            <div class="w-1/2">
+              <label class="block text-sm text-slate-600 mb-1">结束章节</label>
+              <input
+                  v-model="downloadConfig.endChapter"
+                  type="number"
+                  min="1"
+                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                  placeholder="结束章节"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- 最新章节下载 -->
+        <div v-else-if="downloadActiveTab === 2" class="space-y-4">
+          <div>
+            <label class="block text-sm text-slate-600 mb-1">下载最新章节数量</label>
+            <input
+                v-model="downloadConfig.latestChapterCount"
+                type="number"
+                min="1"
+                class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                placeholder="例如: 10"
+            />
+          </div>
+        </div>
+
+        <!-- 按钮区域 -->
+        <div class="flex justify-end space-x-3 mt-6">
+          <button
+              @click="closeDownloadModal"
+              class="px-4 py-2 rounded-lg bg-white/30 backdrop-blur-sm text-slate-700 hover:bg-white/40 transition-all duration-300"
+          >
+            取消
+          </button>
+          <button
+              @click="confirmDownload"
+              class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-300"
+          >
+            开始下载
+          </button>
         </div>
       </div>
     </div>

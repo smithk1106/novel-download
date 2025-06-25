@@ -17,4 +17,13 @@ public class DownloadSendMessage {
     private String searchResultId;
 
 
+
+    private Integer downloadType; // 下载类型：默认下载全部，1-下载指定范围章节，2-下载最新章节
+
+
+    private Integer startChapter; // 开始章节
+    private Integer endChapter; // 开始章节
+
+    private Integer latestChapterCount; // 最新多少章节
+
 }

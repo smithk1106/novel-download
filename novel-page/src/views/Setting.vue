@@ -90,7 +90,7 @@
                   <select v-model="config.extName">
                     <option value="epub">EPUB</option>
                     <option value="txt">TXT</option>
-                    <option value="html">HTML</option>
+<!--                    <option value="html">HTML</option>-->
                   </select>
                 </div>
               </div>
