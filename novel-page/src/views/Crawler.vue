@@ -267,14 +267,6 @@ const confirmDownload = () => {
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
     <div class="container mx-auto px-4 py-16">
-      <!-- 页面标题 -->
-      <div class="mb-16 text-center">
-        <h1 class="text-5xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent mb-4">
-          小说搜索下载
-        </h1>
-        <p class="text-lg text-slate-600 font-light">智能搜索，一键下载您喜爱的小说</p>
-      </div>
-
       <!-- 搜索区域 - 液态玻璃风格 -->
       <div class="max-w-3xl mx-auto mb-12">
         <div class="relative group">
