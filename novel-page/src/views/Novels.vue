@@ -155,7 +155,7 @@
           <div class="absolute inset-0 bg-white/20 backdrop-blur-xl rounded-3xl border border-white/30 shadow-2xl"></div>
           <div class="relative p-8">
             <h3 class="text-2xl font-semibold text-slate-800 mb-4">确认删除</h3>
-            <p class="text-slate-600 mb-8 font-light">确定要删除《{{ deleteDialog.novel?.name }}》吗？此操作不可恢复。</p>
+            <p class="text-slate-800 mb-8 font-light">确定要删除《{{ deleteDialog.novel?.name }}》吗？此操作不可恢复。</p>
             <div class="flex justify-end space-x-4">
               <button 
                 @click="deleteDialog.show = false"
