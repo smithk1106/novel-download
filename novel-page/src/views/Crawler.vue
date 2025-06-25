@@ -329,33 +329,78 @@ const confirmDownload = () => {
                 :class="{'fade-in': message.isNew}"
               >
                 <!-- 小说信息卡片 -->
+<!--                <div v-if="message.type === 'novel'"-->
+<!--                  class="bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300"-->
+<!--                >-->
+<!--                  <div class="flex items-start gap-4">-->
+<!--                    <div class="flex-1">-->
+<!--                      <h3 class="text-lg font-semibold text-slate-800">{{ message.content.title }}</h3>-->
+<!--                      <p class="text-sm text-slate-500 mb-2">{{ message.content.author }}</p>-->
+<!--                      <div class="mt-2 flex items-center gap-4">-->
+<!--                        <span class="text-sm text-slate-500">最新章节：{{ message.content.latestChapter }}</span>-->
+<!--                        <a-->
+<!--                          :href="message.content.url"-->
+<!--                          target="_blank"-->
+<!--                          class="text-sm text-blue-500 hover:text-blue-600"-->
+<!--                        >-->
+<!--                          查看源网站-->
+<!--                        </a>-->
+<!--                      </div>-->
+<!--                    </div>-->
+<!--                    <button-->
+<!--                        @click="openDownloadModal(message.content)"-->
+<!--                        class="flex-shrink-0 bg-gradient-to-r from-purple-400 to-indigo-500 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-500 hover:to-indigo-600 transition-all duration-300"-->
+<!--                    >-->
+<!--                      抓取-->
+<!--                    </button>-->
+<!--                  </div>-->
+<!--                </div>-->
                 <div v-if="message.type === 'novel'"
-                  class="bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
+                     class="bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-300 border border-white/50"
                 >
                   <div class="flex items-start gap-4">
                     <div class="flex-1">
-                      <h3 class="text-lg font-semibold text-slate-800">{{ message.content.title }}</h3>
-                      <p class="text-sm text-slate-500 mb-2">{{ message.content.author }}</p>
-                      <div class="mt-2 flex items-center gap-4">
-                        <span class="text-sm text-slate-500">最新章节：{{ message.content.latestChapter }}</span>
+                      <div class="flex items-center gap-2 mb-1">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <h3 class="text-lg font-semibold text-slate-800">{{ message.content.title }}</h3>
+                      </div>
+                      <div class="flex items-center text-sm text-slate-500 mb-2">
+                        <svg class="w-4 h-4 mr-1 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span>{{ message.content.author }}</span>
+                      </div>
+                      <div class="mt-2 flex items-center gap-4 text-sm">
+                        <div class="flex items-center text-slate-500">
+                          <svg class="w-4 h-4 mr-1 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          <span>最新章节：{{ message.content.latestChapter }}</span>
+                        </div>
                         <a
-                          :href="message.content.url"
-                          target="_blank"
-                          class="text-sm text-blue-500 hover:text-blue-600"
+                            :href="message.content.url"
+                            target="_blank"
+                            class="flex items-center text-blue-400 hover:text-blue-500 transition-colors"
                         >
+                          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
                           查看源网站
                         </a>
                       </div>
                     </div>
+<!--                    px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-cyan-500 text-white hover:from-blue-500 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-blue-500/20-->
                     <button
                         @click="openDownloadModal(message.content)"
-                        class="flex-shrink-0 bg-gradient-to-r from-purple-400 to-indigo-500 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-500 hover:to-indigo-600 transition-all duration-300"
+                        class=" bg-gradient-to-r from-blue-300 to-cyan-400 text-white px-4 py-2 rounded-lg font-medium hover:from-blue-400 hover:to-cyan-500 transition-all duration-300 flex items-center gap-1 shadow-sm shadow-blue-500/20"
                     >
+
                       抓取
                     </button>
                   </div>
                 </div>
-
                 <!-- 控制台消息 -->
                 <div v-else-if="message.type === 'console'"
                   class="text-sm py-2 px-3 rounded-lg font-medium"
@@ -393,7 +438,7 @@ const confirmDownload = () => {
                   <div class="flex items-start gap-3 p-3 bg-white/80 backdrop-blur-md rounded-lg shadow-sm">
                     <div class="text-blue-500 flex-shrink-0 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4 4m0 0l-4-4m4 4V4" />
                       </svg>
                     </div>
                     <div class="flex-1">
@@ -414,14 +459,107 @@ const confirmDownload = () => {
     </div>
   </div>
 
+<!--  &lt;!&ndash; 下载配置弹窗 &ndash;&gt;-->
+<!--  <div v-if="showDownloadModal" class="fixed inset-0 z-50 flex items-center justify-center">-->
+<!--    &lt;!&ndash; 背景遮罩 &ndash;&gt;-->
+<!--    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeDownloadModal"></div>-->
+
+<!--    &lt;!&ndash; 弹窗内容 - 液态玻璃风格 &ndash;&gt;-->
+<!--    <div class="relative w-full max-w-md mx-4 bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden">-->
+<!--      <div class="p-6">-->
+<!--        <h3 class="text-xl font-semibold text-slate-800 mb-4">下载设置</h3>-->
+
+<!--        &lt;!&ndash; 标签页切换 &ndash;&gt;-->
+<!--        <div class="flex border-b border-white/30 mb-6">-->
+<!--          <button-->
+<!--              v-for="(tab, index) in downloadTabs"-->
+<!--              :key="index"-->
+<!--              @click="selectDownloadTab(index)"-->
+<!--              class="px-4 py-2 font-medium text-sm transition-all duration-300"-->
+<!--              :class="downloadActiveTab === index ?-->
+<!--            'border-b-2 border-purple-500 text-purple-700' :-->
+<!--            'text-slate-600 hover:text-purple-500'"-->
+<!--          >-->
+<!--            {{ tab.label }}-->
+<!--          </button>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 全本下载 &ndash;&gt;-->
+<!--        <div v-if="downloadActiveTab === 0" class="space-y-4">-->
+<!--          <p class="text-slate-700">将下载《{{ selectedNovel.title }}》的全部章节</p>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 指定章节下载 &ndash;&gt;-->
+<!--        <div v-else-if="downloadActiveTab === 1" class="space-y-4">-->
+<!--          <div class="flex space-x-4">-->
+<!--            <div class="w-1/2">-->
+<!--              <label class="block text-sm text-slate-600 mb-1">开始章节</label>-->
+<!--              <input-->
+<!--                  v-model="downloadConfig.startChapter"-->
+<!--                  type="number"-->
+<!--                  min="1"-->
+<!--                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"-->
+<!--                  placeholder="开始章节"-->
+<!--              />-->
+<!--            </div>-->
+<!--            <div class="w-1/2">-->
+<!--              <label class="block text-sm text-slate-600 mb-1">结束章节</label>-->
+<!--              <input-->
+<!--                  v-model="downloadConfig.endChapter"-->
+<!--                  type="number"-->
+<!--                  min="1"-->
+<!--                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"-->
+<!--                  placeholder="结束章节"-->
+<!--              />-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 最新章节下载 &ndash;&gt;-->
+<!--        <div v-else-if="downloadActiveTab === 2" class="space-y-4">-->
+<!--          <div>-->
+<!--            <label class="block text-sm text-slate-600 mb-1">下载最新章节数量</label>-->
+<!--            <input-->
+<!--                v-model="downloadConfig.latestChapterCount"-->
+<!--                type="number"-->
+<!--                min="1"-->
+<!--                class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"-->
+<!--                placeholder="例如: 10"-->
+<!--            />-->
+<!--          </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 按钮区域 &ndash;&gt;-->
+<!--        <div class="flex justify-end space-x-3 mt-6">-->
+<!--          <button-->
+<!--              @click="closeDownloadModal"-->
+<!--              class="px-4 py-2 rounded-lg bg-white/30 backdrop-blur-sm text-slate-700 hover:bg-white/40 transition-all duration-300"-->
+<!--          >-->
+<!--            取消-->
+<!--          </button>-->
+<!--          <button-->
+<!--              @click="confirmDownload"-->
+<!--              class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-300"-->
+<!--          >-->
+<!--            开始下载-->
+<!--          </button>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+
   <!-- 下载配置弹窗 -->
   <div v-if="showDownloadModal" class="fixed inset-0 z-50 flex items-center justify-center">
     <!-- 背景遮罩 -->
-    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closeDownloadModal"></div>
+    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="closeDownloadModal"></div>
 
     <!-- 弹窗内容 - 液态玻璃风格 -->
-    <div class="relative w-full max-w-md mx-4 bg-white/20 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden">
-      <div class="p-6">
+    <div class="relative w-full max-w-md mx-4 bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-xl border border-white/30 rounded-2xl shadow-2xl overflow-hidden">
+      <div class="relative p-6 z-10">
+        <!-- 装饰元素 -->
+        <div class="absolute -top-24 -left-24 w-48 h-48 bg-cyan-400/20 rounded-full blur-3xl"></div>
+        <div class="absolute -bottom-20 -right-20 w-56 h-56 bg-blue-500/20 rounded-full blur-3xl"></div>
+
         <h3 class="text-xl font-semibold text-slate-800 mb-4">下载设置</h3>
 
         <!-- 标签页切换 -->
@@ -432,8 +570,8 @@ const confirmDownload = () => {
               @click="selectDownloadTab(index)"
               class="px-4 py-2 font-medium text-sm transition-all duration-300"
               :class="downloadActiveTab === index ?
-            'border-b-2 border-purple-500 text-purple-700' :
-            'text-slate-600 hover:text-purple-500'"
+          'border-b-2 border-blue-500 text-blue-600' :
+          'text-slate-600 hover:text-blue-500'"
           >
             {{ tab.label }}
           </button>
@@ -453,7 +591,7 @@ const confirmDownload = () => {
                   v-model="downloadConfig.startChapter"
                   type="number"
                   min="1"
-                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:bg-white/40 transition-all"
                   placeholder="开始章节"
               />
             </div>
@@ -463,7 +601,7 @@ const confirmDownload = () => {
                   v-model="downloadConfig.endChapter"
                   type="number"
                   min="1"
-                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                  class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:bg-white/40 transition-all"
                   placeholder="结束章节"
               />
             </div>
@@ -478,7 +616,7 @@ const confirmDownload = () => {
                 v-model="downloadConfig.latestChapterCount"
                 type="number"
                 min="1"
-                class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                class="w-full px-4 py-2 bg-white/30 backdrop-blur-sm rounded-lg border border-white/40 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:bg-white/40 transition-all"
                 placeholder="例如: 10"
             />
           </div>
@@ -488,13 +626,14 @@ const confirmDownload = () => {
         <div class="flex justify-end space-x-3 mt-6">
           <button
               @click="closeDownloadModal"
-              class="px-4 py-2 rounded-lg bg-white/30 backdrop-blur-sm text-slate-700 hover:bg-white/40 transition-all duration-300"
+              class="px-4 py-2 rounded-lg bg-white/30 backdrop-blur-sm text-slate-700 hover:bg-white/40 transition-all duration-300 border border-white/20"
           >
             取消
           </button>
+
           <button
               @click="confirmDownload"
-              class="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-300"
+              class="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 to-cyan-500 text-white hover:from-blue-500 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-blue-500/20 z-20 relative"
           >
             开始下载
           </button>
