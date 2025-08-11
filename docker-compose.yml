@@ -1,0 +1,57 @@
+services:
+  novel-db:
+    container_name: novel-db
+    image: mysql:8.0
+    restart: always
+    hostname: novel-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=Demo_20250808
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./novel-server/src/main/resources/db/schema-mysql.sql:/docker-entrypoint-initdb.d/init.sql
+    command: mysqld --max_allowed_packet=100M
+    ports:
+      - "3306:3306"
+    networks:
+      - novelnet
+
+  backend:
+    container_name: backend
+    image: eclipse-temurin:21-jre
+    restart: always
+    volumes:
+      - ./novel-server/target:/app
+      - ./docker/h2db:/app/db
+      - ./docker/download:/app/download
+    working_dir: /app
+    entrypoint: >
+      sh -c "java -jar -Dspring.profiles.active=dev /app/novel-server.jar"
+    ports:
+      - 8580:30000
+    depends_on:
+      - novel-db
+    networks:
+      - novelnet
+  
+  # front:
+  #   container_name: backend
+  #   image: nginx:latest
+  #   restart: always
+  #   environment:
+  #     - apiurl=http://backend:8580/api
+  #   volumes:
+  #     - ./novel-page/build:/usr/share/nginx/html
+  #   command: nginx -g 'daemon off;'
+  #   ports:
+  #     - 8581:80
+  #   depends_on:
+  #     - novel-db
+  #     - backend
+  #   networks:
+  #     - novelnet
+
+networks:
+  novelnet:
+    driver: bridge
+    #driver_opts:
+    #  com.docker.network.bridge.host_binding_ipv4: "127.0.0.1"

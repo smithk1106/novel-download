@@ -1,9 +1,5 @@
 package com.ideaflow.noveldownload.novel.util;
 
-import cn.hutool.core.util.StrUtil;
-import lombok.SneakyThrows;
-import lombok.experimental.UtilityClass;
-
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -12,6 +8,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import cn.hutool.core.util.StrUtil;
+import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
 
 
 /**
@@ -25,6 +25,7 @@ public class FileUtils {
     // 文件排序，按文件名升序
     public List<File> sortFilesByName(File dir) {
         return Arrays.stream(Objects.requireNonNull(dir.listFiles()))
+                .filter(file -> file.getName().startsWith(".") != true) // 排除隐藏文件(例如：.DS_Store)
                 .sorted((o1, o2) -> {
                     int no1 = Integer.parseInt(StrUtil.subBefore(o1.getName(), "_", false));
                     int no2 = Integer.parseInt(StrUtil.subBefore(o2.getName(), "_", false));

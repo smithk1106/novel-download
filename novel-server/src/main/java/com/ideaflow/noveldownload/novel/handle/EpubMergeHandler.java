@@ -36,8 +36,8 @@ public class EpubMergeHandler implements PostProcessingHandler {
         String sessionId = WebSocketContext.getSessionId();
 
         if (FileUtil.isDirEmpty(saveDir)) {
-            Console.error(render("<== 《{}》（{}）下载章节数为 0，取消生成 EPUB", "red"), b.getBookName(), b.getAuthor());
-            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 《%s》（%s）下载章节数为 0，取消生成 EPUB",b.getBookName(), b.getAuthor())));
+            Console.error(render("[i]《{}》（{}）下载章节数为 0，取消生成 EPUB", "red"), b.getBookName(), b.getAuthor());
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]《%s》（%s）下载章节数为 0，取消生成 EPUB",b.getBookName(), b.getAuthor())));
             return;
         }
 
@@ -51,13 +51,13 @@ public class EpubMergeHandler implements PostProcessingHandler {
         meta.addDescription(b.getIntro());
         // 下载封面失败会导致生成 epub 中断
         try {
-            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 正在下载封面： %s...",b.getCoverUrl())));
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]正在下载封面： %s...",b.getCoverUrl())));
             byte[] bytes = HttpUtil.downloadBytes(b.getCoverUrl());
             book.setCoverImage(new Resource(bytes, "cover.jpg"));
             // 添加封面页
             book.addSection("封面", new Resource(ResourceUtil.readBytes("templates/chapter_cover.html"), COVER_NAME));
         } catch (Exception e) {
-            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 封面下载失败： %s...",e.getMessage())));
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]封面下载失败： %s...",e.getMessage())));
         }
         // 不设置会导致 Apple Books 无法使用苹方字体
         meta.setLanguage("zh");

@@ -1,5 +1,32 @@
 package com.ideaflow.noveldownload.novel.parse;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.fusesource.jansi.AnsiRenderer.render;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import com.ideaflow.noveldownload.config.WebSocketContext;
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
+import com.ideaflow.noveldownload.novel.context.HttpClientContext;
+import com.ideaflow.noveldownload.novel.convert.ChineseConverter;
+import com.ideaflow.noveldownload.novel.core.Source;
+import com.ideaflow.noveldownload.novel.handle.SearchResultsHandler;
+import com.ideaflow.noveldownload.novel.model.AppConfig;
+import com.ideaflow.noveldownload.novel.model.Book;
+import com.ideaflow.noveldownload.novel.model.ContentType;
+import com.ideaflow.noveldownload.novel.model.Rule;
+import com.ideaflow.noveldownload.novel.model.SearchResult;
+import com.ideaflow.noveldownload.novel.util.CrawlUtils;
+import com.ideaflow.noveldownload.novel.util.JsoupUtils;
+import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
+
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.Console;
@@ -8,31 +35,11 @@ import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.core.util.URLUtil;
-
 import cn.hutool.json.JSONUtil;
-import com.ideaflow.noveldownload.config.WebSocketContext;
-import com.ideaflow.noveldownload.novel.context.HttpClientContext;
-import com.ideaflow.noveldownload.novel.convert.ChineseConverter;
-import com.ideaflow.noveldownload.novel.core.Source;
-import com.ideaflow.noveldownload.novel.handle.SearchResultsHandler;
-import com.ideaflow.noveldownload.novel.model.*;
-import com.ideaflow.noveldownload.novel.util.CrawlUtils;
-import com.ideaflow.noveldownload.novel.util.JsoupUtils;
-import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 import lombok.SneakyThrows;
-
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-
-import java.util.*;
-
-import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
-import static org.fusesource.jansi.AnsiRenderer.render;
 /**
  * 搜索解析器，负责处理搜索请求和结果解析
  * <p>
@@ -59,11 +66,11 @@ public class SearchParser extends Source {
         WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
         String sessionId = WebSocketContext.getSessionId();
         if (r == null) {
-            webSocketMessageSender.send(sessionId, NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 书源 %s 不支持搜索", config.getSourceId())));
+            webSocketMessageSender.send(sessionId, NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]书源 %s 不支持搜索", config.getSourceId())));
             return Collections.emptyList();
         }
         if (this.rule.isDisabled()) {
-            // Console.error(render("<== 书源 {} 已禁用", "yellow"), this.rule.getId());
+            Console.error(render("[!]书源 {} 已禁用", "yellow"), this.rule.getId());
             return Collections.emptyList();
         }
 
@@ -87,7 +94,7 @@ public class SearchParser extends Source {
             if (errorMsg != null && (errorMsg.toLowerCase().contains("timeout") || errorMsg.toLowerCase().contains("timed out"))) {
                 errorMsg += "，建议更换网络环境后重试";
             }
-            webSocketMessageSender.send(sessionId, NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 书源 %s  (%s ) 搜索解析出错: %s ", this.rule.getId(), this.rule.getName(), errorMsg)));
+            webSocketMessageSender.send(sessionId, NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]书源 %s  (%s ) 搜索解析出错: %s ", this.rule.getId(), this.rule.getName(), errorMsg)));
             return Collections.emptyList();
         }
 

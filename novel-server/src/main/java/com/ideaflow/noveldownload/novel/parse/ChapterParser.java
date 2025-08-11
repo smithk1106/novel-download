@@ -1,27 +1,5 @@
 package com.ideaflow.noveldownload.novel.parse;
 
-import cn.hutool.core.lang.Assert;
-import cn.hutool.core.lang.Console;
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
-import com.ideaflow.noveldownload.config.WebSocketContext;
-import com.ideaflow.noveldownload.novel.context.BookContext;
-import com.ideaflow.noveldownload.novel.context.HttpClientContext;
-import com.ideaflow.noveldownload.novel.convert.ChapterConverter;
-import com.ideaflow.noveldownload.novel.convert.ChineseConverter;
-import com.ideaflow.noveldownload.novel.core.Source;
-import com.ideaflow.noveldownload.novel.model.*;
-import com.ideaflow.noveldownload.novel.util.CrawlUtils;
-import com.ideaflow.noveldownload.novel.util.JsoupUtils;
-import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
-import lombok.SneakyThrows;
-import okhttp3.OkHttpClient;
-import okhttp3.Response;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,8 +7,34 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+
+import com.ideaflow.noveldownload.config.WebSocketContext;
 import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
-import static org.fusesource.jansi.AnsiRenderer.render;
+import com.ideaflow.noveldownload.novel.context.BookContext;
+import com.ideaflow.noveldownload.novel.context.HttpClientContext;
+import com.ideaflow.noveldownload.novel.convert.ChapterConverter;
+import com.ideaflow.noveldownload.novel.convert.ChineseConverter;
+import com.ideaflow.noveldownload.novel.core.Source;
+import com.ideaflow.noveldownload.novel.model.AppConfig;
+import com.ideaflow.noveldownload.novel.model.Book;
+import com.ideaflow.noveldownload.novel.model.Chapter;
+import com.ideaflow.noveldownload.novel.model.ContentType;
+import com.ideaflow.noveldownload.novel.model.Rule;
+import com.ideaflow.noveldownload.novel.util.CrawlUtils;
+import com.ideaflow.noveldownload.novel.util.JsoupUtils;
+import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
+
+import cn.hutool.core.lang.Assert;
+import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
+import lombok.SneakyThrows;
+import okhttp3.OkHttpClient;
+import okhttp3.Response;
 
 
 
@@ -65,7 +69,7 @@ public class ChapterParser extends Source {
         try {
             long interval = CrawlUtils.randomInterval(config);
             if (config.getShowDownloadLog() == 1) {
-//                Console.log("<== 正在下载: 【{}】 间隔 {} ms", chapter.getTitle(), interval);
+               Console.log("[D]正在下载:【{}】间隔: {}ms", chapter.getTitle(), interval);
             }
 
             String content = fetchContent(chapter.getUrl(), interval);
@@ -90,16 +94,16 @@ public class ChapterParser extends Source {
             try {
                 long interval = CrawlUtils.randomInterval(config, true);
 
-                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 【%s】下载失败，正在重试。重试次数: %d/%d 重试间隔: %d ms 原因: %s", chapter.getTitle(), attempt, config.getMaxRetryAttempts(), interval, errMsg)));
+                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]【%s】下载失败，正在重试。重试次数: %d/%d 重试间隔: %d ms 原因: %s", chapter.getTitle(), attempt, config.getMaxRetryAttempts(), interval, errMsg)));
                 String content = fetchContent(chapter.getUrl(), interval);
                 Assert.notEmpty(content, "正文内容为空");
                 chapter.setContent(content);
 
-                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 重试成功: 【%s】", chapter.getTitle())));
+                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]重试成功: 【%s】", chapter.getTitle())));
                 return chapterConverter.convert(chapter);
 
             } catch (Exception e) {
-                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 第 %d 次重试失败: 【%s】 原因: %s", attempt, chapter.getTitle(), e.getMessage())));
+                webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]第 %d 次重试失败: 【%s】 原因: %s", attempt, chapter.getTitle(), e.getMessage())));
                 if (attempt == config.getMaxRetryAttempts()) {
                     // 最终失败时记录日志
                     saveDownloadErrorLog(chapter, e.getMessage());
@@ -112,8 +116,8 @@ public class ChapterParser extends Source {
 
     private void saveDownloadErrorLog(Chapter chapter, String errMsg) {
         Book book = BookContext.get();
-        String line = StrUtil.format("下载失败章节: 【{}】({})\t原因: {}", chapter.getTitle(), chapter.getUrl(), errMsg);
-        String path = StrUtil.format("{}{}《{}》({}) 下载失败章节.log",
+        String line = StrUtil.format("[E]下载失败章节: 【{}】({})\t原因: {}", chapter.getTitle(), chapter.getUrl(), errMsg);
+        String path = StrUtil.format("[E]{}{}《{}》({}) 下载失败章节.log",
                 config.getDownloadPath(), File.separator, book.getBookName(), book.getAuthor());
 
         try (PrintWriter pw = new PrintWriter(new FileWriter(path, StandardCharsets.UTF_8, true))) {

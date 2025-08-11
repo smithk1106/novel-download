@@ -25,13 +25,13 @@ public class CrawlerPostHandler {
     public void handle(File saveDir) {
         Book book = BookContext.get();
         String extName = config.getExtName();
-        StringBuilder s = new StringBuilder(StrUtil.format("\n<== 《{}》（{}）下载完毕，", book.getBookName(), book.getAuthor()));
+        StringBuilder s = new StringBuilder(StrUtil.format("\n[i]《{}》（{}）下载完毕，", book.getBookName(), book.getAuthor()));
 
         if (ALLOWED_EXTENSIONS.contains(extName.toLowerCase())) {
-            s.append("正在合并为 ").append(extName.toUpperCase());
+            s.append("[i]正在合并为 ").append(extName.toUpperCase());
         }
         if ("html".equals(extName)) {
-            s.append("正在生成 HTML 目录文件");
+            s.append("[i]正在生成 HTML 目录文件");
         }
 
         WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();

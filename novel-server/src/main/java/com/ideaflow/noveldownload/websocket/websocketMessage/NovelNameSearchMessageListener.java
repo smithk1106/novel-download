@@ -1,9 +1,17 @@
 package com.ideaflow.noveldownload.websocket.websocketMessage;
 
 
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.json.JSONUtil;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+import org.springframework.web.socket.WebSocketSession;
+
 import com.ideaflow.noveldownload.config.WebSocketContext;
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
+import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_RESULT_MESSAGE_LISTENER;
 import com.ideaflow.noveldownload.entity.AppConfigEntity;
 import com.ideaflow.noveldownload.entity.SearchResultEntity;
 import com.ideaflow.noveldownload.mapper.AppConfigMapper;
@@ -16,17 +24,10 @@ import com.ideaflow.noveldownload.novel.model.SearchResult;
 import com.ideaflow.noveldownload.websocket.websocketMessage.message.NameSearchSendMessage;
 import com.ideaflow.noveldownload.websocket.websocketcore.listener.WebSocketMessageListener;
 import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
+
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.json.JSONUtil;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.socket.WebSocketSession;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
-import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_RESULT_MESSAGE_LISTENER;
 
 
 /**
@@ -66,14 +67,11 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
                 dealSingleSourceSearch(config, session, message, isExact);
             }
         }
-
-
-
     }
 
     private void dealSingleSourceSearch(AppConfig config,WebSocketSession session, NameSearchSendMessage message, boolean isExact) {
 
-        webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 数据源:%s", config.getSourceId())));
+        webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]数据源:%s", config.getSourceId())));
         // 查找数据
         List<SearchResult> results = new Crawler(config).search(message.getBookName());
 
@@ -103,7 +101,7 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
                 webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_RESULT_MESSAGE_LISTENER, JSONUtil.toJsonStr(searchResultEntity));
             }
         }else {
-            webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("<== 数据源id:%s,搜索完成,未查询到",config.getSourceId())));
+            webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]数据源id:%s,搜索完成,未查询到",config.getSourceId())));
         }
     }
 

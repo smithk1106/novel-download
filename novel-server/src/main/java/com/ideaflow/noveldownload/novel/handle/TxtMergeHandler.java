@@ -1,16 +1,17 @@
 package com.ideaflow.noveldownload.novel.handle;
 
+import java.io.File;
+import java.util.List;
+
+import com.ideaflow.noveldownload.novel.model.AppConfig;
+import com.ideaflow.noveldownload.novel.model.Book;
+import com.ideaflow.noveldownload.novel.util.FileUtils;
+
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileAppender;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HtmlUtil;
-import com.ideaflow.noveldownload.novel.model.AppConfig;
-import com.ideaflow.noveldownload.novel.model.Book;
-import com.ideaflow.noveldownload.novel.util.FileUtils;
 import lombok.AllArgsConstructor;
-
-import java.io.File;
-import java.util.List;
 
 
 @AllArgsConstructor
@@ -42,7 +43,7 @@ public class TxtMergeHandler implements PostProcessingHandler {
         }
         appender.flush();
 
-        downloadCover(book, saveDir);
+        //downloadCover(book, saveDir);
     }
 
 }
