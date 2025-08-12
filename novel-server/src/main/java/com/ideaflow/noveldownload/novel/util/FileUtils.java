@@ -2,6 +2,7 @@ package com.ideaflow.noveldownload.novel.util;
 
 import java.io.File;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -25,11 +26,16 @@ public class FileUtils {
     // 文件排序，按文件名升序
     public List<File> sortFilesByName(File dir) {
         return Arrays.stream(Objects.requireNonNull(dir.listFiles()))
-                .filter(file -> file.getName().startsWith(".") != true) // 排除隐藏文件(例如：.DS_Store)
+                .filter(file -> file.isFile() && file.getName().startsWith(".") != true) // 排除文件夹和隐藏文件(例如：.DS_Store)
                 .sorted((o1, o2) -> {
-                    int no1 = Integer.parseInt(StrUtil.subBefore(o1.getName(), "_", false));
-                    int no2 = Integer.parseInt(StrUtil.subBefore(o2.getName(), "_", false));
-                    return no1 - no2;
+                    if (o1.getName().contains("_") && o2.getName().contains("_")) {
+                        // 如果文件名包含下划线，则按下划线前的数字排序
+                        int no1 = Integer.parseInt(StrUtil.subBefore(o1.getName(), "_", false));
+                        int no2 = Integer.parseInt(StrUtil.subBefore(o2.getName(), "_", false));
+                        return no1 - no2;
+                    } else {
+                        return o1.getName().compareTo(o2.getName());
+                    }
                 }).toList();
     }
 
@@ -40,7 +46,7 @@ public class FileUtils {
      */
     @SneakyThrows
     public long fileSize(String fileUrl) {
-        URL url = new URL(fileUrl);
+        URL url = new URI(fileUrl).toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         // 使用 HEAD 请求方法，只获取头部信息
         conn.setRequestMethod("HEAD");
