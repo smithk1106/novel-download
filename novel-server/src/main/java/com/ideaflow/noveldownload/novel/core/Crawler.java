@@ -3,6 +3,8 @@ package com.ideaflow.noveldownload.novel.core;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -100,6 +102,14 @@ public class Crawler {
             return null;
         }
 
+        // HTML模板相关文件
+        if (config.getExtName().equalsIgnoreCase("html")) {
+            // Copy css file to download folder
+            exportResourceFile("/templates/css/style.css", new File(dir.getAbsolutePath() + File.separator + "css" + File.separator + "style.css"));
+            // Copy js file to download folder
+            exportResourceFile("/templates/js/chapter.js", new File(dir.getAbsolutePath() + File.separator + "js" + File.separator + "chapter.js"));
+        }
+
         // 下载封面
         downloadCover(book, dir);
 
@@ -150,7 +160,6 @@ public class Crawler {
 
         executor.shutdown();
         BookContext.clear();
-        double totalTimeSeconds = stopWatch.getTotalTimeSeconds();
 
         return book;
     }
@@ -183,6 +192,26 @@ public class Crawler {
             case "epub", "pdf" -> "_" + FileUtils.sanitizeFileName(chapter.getTitle()) + ".html";
             default -> throw new IllegalStateException("暂不支持的下载格式: " + config.getExtName());
         };
+    }
+
+    private boolean exportResourceFile(String resourcePath, File targetPath) {
+        try (InputStream input = getClass().getResourceAsStream(resourcePath)) {
+            if (input == null) {
+                Console.error("[E]资源文件不存在: {}", resourcePath);
+                return false;
+            }
+            if (!targetPath.getParentFile().exists()) {
+                targetPath.getParentFile().mkdirs();
+            }
+            FileOutputStream output = new FileOutputStream(targetPath);
+            output.write(input.readAllBytes());
+            output.close();
+            Console.error("[D]已导出资源文件: {}", targetPath);
+            return true;
+        } catch (IOException e) {
+            Console.error("[E]导出资源文件失败: {}", e.getMessage());
+            return false;
+        }
     }
 
     /**

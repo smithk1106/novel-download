@@ -69,7 +69,7 @@ public class ChapterParser extends Source {
         try {
             long interval = CrawlUtils.randomInterval(config);
             if (config.getShowDownloadLog() == 1) {
-               Console.log("[D]正在下载:【{}】间隔: {}ms", chapter.getTitle(), interval);
+               Console.log("[D]正在下载:【{}】{}. 间隔: {}ms", chapter.getTitle(), chapter.getUrl(), interval);
             }
 
             String content = fetchContent(chapter.getUrl(), interval);
@@ -172,9 +172,9 @@ public class ChapterParser extends Source {
 
             String content = JsoupUtils.selectAndInvokeJs(doc, r.getContent(), ContentType.HTML);
             // String ==> Elements
-            Elements contentEls = Jsoup.parse(content).children();
-            JsoupUtils.clearAllAttributes(contentEls);
-            contentBuilder.append(contentEls.html());
+            //Elements contentEls = Jsoup.parse(content).children();
+            //JsoupUtils.clearAllAttributes(contentEls);
+            contentBuilder.append(content);
 
             // 获取下一页按钮元素
             Elements nextEls = JsoupUtils.select(doc, r.getNextPage());

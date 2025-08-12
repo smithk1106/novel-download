@@ -65,12 +65,11 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
             SearchResultEntity searchResultEntity = searchResultMapper.selectById(message.getSearchResultId());
             WebSocketThreadLocal.setThreadLocalValue(session.getId());
             if (Objects.isNull(searchResultEntity)) {
-                webSocketMessageSender.send(session.getId(), "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr("数据为空,请重新尝试搜索:id:"+message.getSearchResultId()));
+                webSocketMessageSender.send(session.getId(), "NovelDownloadConsoleMessageListener", JSONUtil.toJsonStr("[E]数据为空,请重新尝试搜索:id:"+message.getSearchResultId()));
                 return;
             }
             config.setSourceId(searchResultEntity.getSourceId());
             HttpClientContext.set(OkHttpClientFactory.create(config, true));
-
 
             // 查找数据
             webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr("[i]正在获取章节目录 ..."));
@@ -79,8 +78,6 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
             TocParser catalogParser = new TocParser(config);
 
             List<Chapter> catalogs = catalogParser.parse(searchResult.getUrl(), 1, Integer.MAX_VALUE);
-
-
             List<Chapter> downloadCatalogs = new ArrayList<>();
             if (message.getDownloadType() == null || message.getDownloadType() == 0) {
                 // 默认下载全部
@@ -109,7 +106,6 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
                 }
             }
 
-
             String r1 =  String.format("[i]你选择了《%s》(%s)，共计 %s 章 数据源:%s %s,开始下载全本,请稍后",searchResult.getBookName(),searchResult.getAuthor(),catalogs.size(),config.getSourceId(),searchResult.getUrl());
             webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(r1));
 
@@ -135,7 +131,6 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
             WebSocketContext.clearSessionId();
             WebSocketContext.clearSerder();
         }
-
     }
 
     @Override

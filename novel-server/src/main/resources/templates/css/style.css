@@ -1,0 +1,21 @@
+body {
+    max-width: 800px;
+    margin: 100px auto;
+    background: #111;
+}
+
+h1 {
+    color: #939392;
+}
+
+p {
+    text-indent: 2em;
+    letter-spacing: 0.1em;
+    color: #939392;
+    font-size: 25px;
+    margin: 40px 0;
+}
+
+.bottom-bar {
+    margin-top: 100px;
+}
