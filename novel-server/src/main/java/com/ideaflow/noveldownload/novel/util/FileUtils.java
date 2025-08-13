@@ -28,12 +28,13 @@ public class FileUtils {
         return Arrays.stream(Objects.requireNonNull(dir.listFiles()))
                 .filter(file -> file.isFile() && file.getName().startsWith(".") != true) // 排除文件夹和隐藏文件(例如：.DS_Store)
                 .sorted((o1, o2) -> {
-                    if (o1.getName().contains("_") && o2.getName().contains("_")) {
-                        // 如果文件名包含下划线，则按下划线前的数字排序
+                    // 如果文件名包含下划线，则按下划线前的数字排序
+                    try {
                         int no1 = Integer.parseInt(StrUtil.subBefore(o1.getName(), "_", false));
                         int no2 = Integer.parseInt(StrUtil.subBefore(o2.getName(), "_", false));
                         return no1 - no2;
-                    } else {
+                    } catch (NumberFormatException e) {
+                        // 如果转换失败，则按文件名字符串排序
                         return o1.getName().compareTo(o2.getName());
                     }
                 }).toList();

@@ -54,13 +54,48 @@ public class BookParser extends Source {
         book.setIntro(intro);
         book.setCoverUrl(CoverUpdater.fetchCover(book, coverUrl));
         book.setCategory(category);
+        book.setCategoryId(guessCategory(category).getCode());
         book.setLatestChapter(latestChapter);
         book.setLastUpdateTime(lastUpdateTime);
         book.setStatus(status);
-        book.setWordCount(wordCount);
+        try {
+            book.setWordCount(Long.parseLong(wordCount));
+        } catch (NumberFormatException e) {
+            book.setWordCount(0L);
+        }
 
         return ChineseConverter.convert(book, this.rule.getLanguage(), config.getLanguage());
     }
+
+    /**
+     * 猜测分类
+     * 
+     * @param categoryString 分类字符串
+     * @return 猜测的分类
+     */
+    public BookCategory guessCategory(String categoryString) {
+        BookCategory bookCategory = BookCategory.UNKNOWN;
+        
+        if (categoryString == null || categoryString.isEmpty()) {
+            return bookCategory;
+        }
+        // 遍历所有枚举值，匹配包含的分类
+        for (BookCategory cat : BookCategory.values()) {
+            String[] categories = cat.getDescription().split(",");
+            for (String catDesc : categories) {
+                if (categoryString.contains(catDesc)) {
+                    bookCategory = cat;
+                    break;
+                }
+            }
+            if (bookCategory != BookCategory.UNKNOWN) {
+                break;
+            }
+        }
+
+        return bookCategory;
+    }
+    
 
     private ContentType getContentType(String query) {
         if (StrUtil.isEmpty(query)) {

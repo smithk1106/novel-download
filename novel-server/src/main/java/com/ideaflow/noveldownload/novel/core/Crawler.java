@@ -15,6 +15,8 @@ import java.util.concurrent.Executors;
 import static org.fusesource.jansi.AnsiRenderer.render;
 
 import com.ideaflow.noveldownload.config.WebSocketContext;
+import com.ideaflow.noveldownload.constans.CommonConst;
+
 import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
 import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER;
 import com.ideaflow.noveldownload.novel.context.BookContext;
@@ -27,6 +29,7 @@ import com.ideaflow.noveldownload.novel.parse.BookParser;
 import com.ideaflow.noveldownload.novel.parse.ChapterParser;
 import com.ideaflow.noveldownload.novel.parse.SearchParser;
 import com.ideaflow.noveldownload.novel.util.FileUtils;
+import com.ideaflow.noveldownload.service.NovelService;
 import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
 
 import cn.hutool.core.date.StopWatch;
@@ -46,13 +49,13 @@ public class Crawler {
 
     private final AppConfig config;
     private String bookDir;
-
     private int digitCount;
 
+    private NovelService novelService;
 
-
-    public Crawler(AppConfig config) {
+    public Crawler(AppConfig config, NovelService novelService) {
         this.config = config;
+        this.novelService = novelService;
     }
 
     /**
@@ -86,32 +89,56 @@ public class Crawler {
      * @param toc     章节目录
      */
     @SneakyThrows
-    public Book crawl(String bookUrl, List<Chapter> toc) {
-        digitCount = String.valueOf(toc.size()).length();
+    public Book crawl(String bookUrl, List<Chapter> toc, int digitCount) {
         Book book = new BookParser(config).parse(bookUrl);
         BookContext.set(book);
         WebSocketMessageSender webSocketMessageSender = WebSocketContext.getSender();
         String sessionId = WebSocketContext.getSessionId();
 
-        // 下载临时目录名格式：书名(作者) EXT
-        bookDir = FileUtils.sanitizeFileName("%s(%s) %s".formatted(book.getBookName(), book.getAuthor(), config.getExtName().toUpperCase()));
-        // 必须 new File()，否则无法使用 . 和 ..
-        File dir = FileUtil.mkdir(new File(config.getDownloadPath() + File.separator + bookDir));
-        if (!dir.exists()) {
-            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]创建下载目录失败:%s,请检查是否有创建文件的权限",dir.getPath())));
+        this.digitCount = digitCount;
+        book.setSaveType(config.getExtName().toLowerCase());
+
+        // 保存小说信息
+        if (novelService.saveBook(book) == 0L) {
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]无法保存小说信息:%s",book.getBookName())));
             return null;
         }
 
-        // HTML模板相关文件
-        if (config.getExtName().equalsIgnoreCase("html")) {
-            // Copy css file to download folder
-            exportResourceFile("/templates/css/style.css", new File(dir.getAbsolutePath() + File.separator + "css" + File.separator + "style.css"));
-            // Copy js file to download folder
-            exportResourceFile("/templates/js/chapter.js", new File(dir.getAbsolutePath() + File.separator + "js" + File.separator + "chapter.js"));
+        // 下载临时目录名
+        if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(config.getExtName())) {
+            // HTML 格式：书的ID
+            bookDir = String.valueOf(book.getId());
+        } else {
+            // 其他格式：书名(作者)_EXT
+            bookDir = FileUtils.sanitizeFileName(String.format("%s(%s)_%s", book.getBookName(), book.getAuthor(), config.getExtName().toUpperCase()));
+        }
+        // 必须 new File()，否则无法使用 . 和 ..
+        File saveDir = FileUtil.mkdir(new File(config.getDownloadPath() + File.separator + bookDir));
+        if (!saveDir.exists()) {
+            webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]创建下载目录失败:%s,请检查是否有创建文件的权限",saveDir.getPath())));
+            return null;
+        }
+
+        if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(config.getExtName())) {
+            book.setDownloadUrl(String.format("%d", book.getId()));
+            // 导出HTML模板相关资源
+            exportResourceFile("/templates/css/style.css", new File(config.getDownloadPath() + File.separator + "css" + File.separator + "style.css"));
+            exportResourceFile("/templates/js/chapter.js", new File(config.getDownloadPath() + File.separator + "js" + File.separator + "chapter.js"));
+        } else {
+            book.setDownloadUrl(String.format("%s/%s(%s).%s", config.getDownloadPath().replace(File.separator, "/"), book.getBookName(), book.getAuthor(), book.getSaveType()));
         }
 
         // 下载封面
-        downloadCover(book, dir);
+        String coverUrl = downloadCover(book, saveDir);
+        if (!coverUrl.isEmpty()) {
+            book.setCoverUrl(coverUrl);
+        }
+
+        // // 更新小说信息
+        // if (novelService.updateBook(book) == 0) {
+        //     webSocketMessageSender.send(sessionId, NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]无法更新小说信息:%s",book.getBookName())));
+        //     return null;
+        // }
 
         int autoThreads = config.getThreads() == -1 ? RuntimeUtil.getProcessorCount() * 2 : config.getThreads();
         // 创建线程池
@@ -138,7 +165,13 @@ public class Crawler {
             try {
                 WebSocketContext.setSender(webSocketMessageSender);
                 WebSocketContext.set(sessionId);
-                createChapterFile(chapterParser.parse(item, latch));
+                Chapter chapter = chapterParser.parse(item, latch);
+                // 保存章节信息
+                chapter.setBookId(book.getId());
+                if (novelService.saveChapter(chapter) > 0) {
+                    book.setWordCount(book.getWordCount() + chapter.getWordCount());
+                }
+                createChapterFile(chapter);
                 if (config.getShowDownloadLog() == 1) {
                     webSocketMessageSender.send(
                         sessionId,
@@ -150,12 +183,11 @@ public class Crawler {
                 WebSocketContext.clearSessionId();
                 WebSocketContext.clearSerder();
             }
-
         }));
 
         // 阻塞主线程，等待全部章节下载完毕
         latch.await();
-        new CrawlerPostHandler(config).handle(dir);
+        new CrawlerPostHandler(config).handle(saveDir);
         stopWatch.stop();
 
         executor.shutdown();
@@ -186,10 +218,10 @@ public class Crawler {
 
         return parentPath + order + switch (config.getExtName()) {
             // 下划线用于兼容，不要删除，见 com/pcdd/sonovel/handle/HtmlTocHandler.java:28
-            case "html" -> "_.html";
-            case "txt" -> "_" + FileUtils.sanitizeFileName(chapter.getTitle()) + ".txt";
+            case CommonConst.SAVE_TYPE_HTML -> "_.html";
+            case CommonConst.SAVE_TYPE_TEXT -> "_" + FileUtils.sanitizeFileName(chapter.getTitle()) + ".txt";
             // 转换前的格式为 html
-            case "epub", "pdf" -> "_" + FileUtils.sanitizeFileName(chapter.getTitle()) + ".html";
+            case CommonConst.SAVE_TYPE_EPUB, CommonConst.SAVE_TYPE_PDF -> "_" + FileUtils.sanitizeFileName(chapter.getTitle()) + ".html";
             default -> throw new IllegalStateException("暂不支持的下载格式: " + config.getExtName());
         };
     }
@@ -217,13 +249,18 @@ public class Crawler {
     /**
      * 下载封面失败会导致生成中断，必须捕获异常
      */
-    private void downloadCover(Book book, File saveDir) {
+    private String downloadCover(Book book, File saveDir) {
         try {
             Console.log("[i]正在下载封面：{}", book.getCoverUrl());
-            File coverFile = HttpUtil.downloadFileFromUrl(book.getCoverUrl(), FileUtils.resolvePath(saveDir.toString()));
-            FileUtil.rename(coverFile, "0_封面." + FileUtil.getType(coverFile), true);
+            File imgDir = new File(saveDir.getParentFile(), "img");
+            if (!imgDir.exists()) imgDir.mkdirs();
+            File coverFile = HttpUtil.downloadFileFromUrl(book.getCoverUrl(), imgDir.getAbsolutePath());
+            File newCoverFile = FileUtil.rename(coverFile, StrUtil.format("cover_{}.{}", book.getId(), FileUtil.getType(coverFile)), true);
+            Console.log("[i]已下载封面：{}", newCoverFile.getAbsolutePath());
+            return "img/" + newCoverFile.getName();
         } catch (Exception e) {
             Console.error(render("[E]封面下载失败：{}", "red"), e.getMessage());
+            return "";
         }
     }
 }

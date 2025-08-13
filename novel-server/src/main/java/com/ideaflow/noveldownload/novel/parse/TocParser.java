@@ -126,7 +126,7 @@ public class TocParser extends Source {
     private List<Chapter> parseToc(Set<String> urls, int start, int end, Rule.Toc r) {
         List<Chapter> toc = new TocList();
         boolean isDesc = r.isDesc();
-        int orderNumber = 1;
+        long orderNumber = 1L;
         int offset = r.getOffset() != null ? r.getOffset() : 0;
 
         // TODO 多线程优化
@@ -180,7 +180,7 @@ public class TocParser extends Source {
         return elements;
     }
 
-    private void addChapter(Element el, List<Chapter> toc, int order, Rule.Toc r) {
+    private void addChapter(Element el, List<Chapter> toc, long order, Rule.Toc r) {
         String url = JsoupUtils.getStrAndInvokeJs(el, r.getNextPage(), ATTR_HREF);
         toc.add(Chapter.builder()
                 .title(el.text())

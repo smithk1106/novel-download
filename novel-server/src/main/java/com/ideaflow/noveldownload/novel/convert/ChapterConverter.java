@@ -31,6 +31,8 @@ public class ChapterConverter {
         String filteredContent = new ChapterFilter(config).filter(chapter);
         String content = new ChapterFormatter(config).format(filteredContent);
 
+        chapter.setCleanContent(content);  // 设置清理后的内容
+
         if ("txt".equals(extName)) {
             // 全角空格，用于首行缩进
             String ident = "\u3000".repeat(2);

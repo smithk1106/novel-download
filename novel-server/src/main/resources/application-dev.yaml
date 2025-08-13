@@ -1,7 +1,7 @@
 logging:
   config: classpath:logback-dev.xml
 
-#mybatis-plus:
+# mybatis-plus:
 #  configuration:
 #    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  #控制台打印 sql日志
 
@@ -28,6 +28,8 @@ spring:
       mode: always  #- Spring Boot应用启动时始终执行数据库初始化
     # mode: embedded - 只初始化内存数据库，比如H2数据库
     # mode: never:  - 从不执行初始化数据库
+  app:
+    contentBase: http://localhost:8585/
 
 ideaflow:
   websocket:

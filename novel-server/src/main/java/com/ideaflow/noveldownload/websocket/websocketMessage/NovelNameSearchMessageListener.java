@@ -21,6 +21,7 @@ import com.ideaflow.noveldownload.novel.core.Crawler;
 import com.ideaflow.noveldownload.novel.core.OkHttpClientFactory;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.SearchResult;
+import com.ideaflow.noveldownload.service.NovelService;
 import com.ideaflow.noveldownload.websocket.websocketMessage.message.NameSearchSendMessage;
 import com.ideaflow.noveldownload.websocket.websocketcore.listener.WebSocketMessageListener;
 import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessageSender;
@@ -45,6 +46,9 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
 
     @Resource
     private SearchResultMapper searchResultMapper;
+
+    @Resource
+    private NovelService novelService;
 
     @Override
     public void onMessage(WebSocketSession session, NameSearchSendMessage message) {
@@ -73,7 +77,7 @@ public class NovelNameSearchMessageListener implements WebSocketMessageListener<
 
         webSocketMessageSender.send(session.getId(), NOVEL_NAME_SEARCH_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]数据源:%s", config.getSourceId())));
         // 查找数据
-        List<SearchResult> results = new Crawler(config).search(message.getBookName());
+        List<SearchResult> results = new Crawler(config, novelService).search(message.getBookName());
 
 
         List<SearchResultEntity> insertList = results.stream().filter(v->{
