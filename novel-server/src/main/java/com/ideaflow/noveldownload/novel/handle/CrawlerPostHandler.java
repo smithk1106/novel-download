@@ -1,10 +1,10 @@
 package com.ideaflow.noveldownload.novel.handle;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ideaflow.noveldownload.config.WebSocketContext;
+import com.ideaflow.noveldownload.constans.CommonConst;
 import com.ideaflow.noveldownload.novel.context.BookContext;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Book;
@@ -18,7 +18,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 public class CrawlerPostHandler {
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("txt", "epub", "pdf");
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(CommonConst.SAVE_TYPE_TEXT, CommonConst.SAVE_TYPE_EPUB, CommonConst.SAVE_TYPE_PDF);
     private final AppConfig config;
 
     @SneakyThrows
@@ -30,7 +30,7 @@ public class CrawlerPostHandler {
         if (ALLOWED_EXTENSIONS.contains(extName.toLowerCase())) {
             s.append("[i]正在合并为 ").append(extName.toUpperCase());
         }
-        if ("html".equals(extName)) {
+        if (CommonConst.SAVE_TYPE_HTML.equals(extName)) {
             s.append("[i]正在生成 HTML 目录文件");
         }
 

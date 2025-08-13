@@ -3,11 +3,15 @@ package com.ideaflow.noveldownload.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.ideaflow.noveldownload.config.AppProperties;
+import com.ideaflow.noveldownload.constans.CommonConst;
 import com.ideaflow.noveldownload.entity.NovelEntity;
 import com.ideaflow.noveldownload.mapper.NovelMapper;
 import com.ideaflow.noveldownload.pojo.CommonResult;
 import com.ideaflow.noveldownload.pojo.NovelWebSearch;
 import jakarta.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +24,9 @@ public class NovelController {
 
     @jakarta.annotation.Resource
     private NovelMapper novelMapper;
+
+    @Autowired
+    private AppProperties appProperties;
 
     @PostMapping("/list")
     public CommonResult<IPage<NovelEntity>> list(@Valid @RequestBody NovelWebSearch novelWebSearch) {
@@ -36,6 +43,18 @@ public class NovelController {
         queryWrapper.orderByDesc(NovelEntity::getId);
         // 执行分页查询
         IPage<NovelEntity> pageResult = novelMapper.selectPage(page, queryWrapper);
+        pageResult.getRecords().forEach(novelEntity -> {
+            // 设置下载地址
+            if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(novelEntity.getSaveType()) && StringUtils.hasText(novelEntity.getDownloadUrl())) {
+                if (!novelEntity.getDownloadUrl().startsWith("http")) {
+                    novelEntity.setDownloadUrl(appProperties.getContentBase() + novelEntity.getDownloadUrl());
+                }
+            }
+            // 设置封面地址
+            if (StringUtils.hasText(novelEntity.getCover())) {
+                novelEntity.setCover(appProperties.getContentBase() + novelEntity.getCover());
+            }
+        });
         
         return CommonResult.success(pageResult);
     }

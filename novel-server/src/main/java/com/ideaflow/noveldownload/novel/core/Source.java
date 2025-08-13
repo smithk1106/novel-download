@@ -2,13 +2,10 @@ package com.ideaflow.noveldownload.novel.core;
 
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.lang.Console;
-import cn.hutool.core.lang.Opt;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.ideaflow.noveldownload.novel.model.AppConfig;
 import com.ideaflow.noveldownload.novel.model.Rule;
-import com.ideaflow.noveldownload.novel.util.ConfigUtils;
-
 import static org.fusesource.jansi.AnsiRenderer.render;
 
 

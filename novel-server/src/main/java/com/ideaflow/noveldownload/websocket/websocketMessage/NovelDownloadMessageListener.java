@@ -1,7 +1,6 @@
 package com.ideaflow.noveldownload.websocket.websocketMessage;
 
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -10,12 +9,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
 import com.ideaflow.noveldownload.config.WebSocketContext;
+import com.ideaflow.noveldownload.constans.CommonConst;
+
 import static com.ideaflow.noveldownload.constans.CommonConst.NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER;
 import com.ideaflow.noveldownload.entity.AppConfigEntity;
-import com.ideaflow.noveldownload.entity.NovelEntity;
 import com.ideaflow.noveldownload.entity.SearchResultEntity;
 import com.ideaflow.noveldownload.mapper.AppConfigMapper;
-import com.ideaflow.noveldownload.mapper.NovelMapper;
 import com.ideaflow.noveldownload.mapper.SearchResultMapper;
 import com.ideaflow.noveldownload.novel.context.HttpClientContext;
 import com.ideaflow.noveldownload.novel.core.Crawler;
@@ -25,6 +24,7 @@ import com.ideaflow.noveldownload.novel.model.Book;
 import com.ideaflow.noveldownload.novel.model.Chapter;
 import com.ideaflow.noveldownload.novel.model.SearchResult;
 import com.ideaflow.noveldownload.novel.parse.TocParser;
+import com.ideaflow.noveldownload.service.NovelService;
 import com.ideaflow.noveldownload.websocket.config.WebSocketThreadLocal;
 import com.ideaflow.noveldownload.websocket.websocketMessage.message.DownloadSendMessage;
 import com.ideaflow.noveldownload.websocket.websocketcore.listener.WebSocketMessageListener;
@@ -32,7 +32,6 @@ import com.ideaflow.noveldownload.websocket.websocketcore.sender.WebSocketMessag
 
 import cn.hutool.core.date.StopWatch;
 import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import jakarta.annotation.Resource;
 
@@ -55,7 +54,7 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
     private SearchResultMapper searchResultMapper;
 
     @Resource
-    private NovelMapper novelMapper;
+    private NovelService novelService;
 
     @Override
     public void onMessage(WebSocketSession session, DownloadSendMessage message) {
@@ -115,18 +114,19 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
             WebSocketContext.setSender(webSocketMessageSender);
             WebSocketContext.set(session.getId());
 
-            Book book = new Crawler(config).crawl(searchResult.getUrl(), downloadCatalogs);
+            Book book = new Crawler(config, novelService).crawl(searchResult.getUrl(), downloadCatalogs, String.valueOf(catalogs.size()).length());
+
+            Long bookId = 0L;
+            if (CommonConst.SAVE_TYPE_HTML.equalsIgnoreCase(config.getExtName())) {
+                bookId = novelService.updateBook(book);
+            } else {
+                // 保存小说信息
+                bookId = novelService.saveBook(book);
+            }
+
             stopWatch.stop();
             double totalTimeSeconds = stopWatch.getTotalTimeSeconds();
-            NovelEntity novelEntity = new NovelEntity();
-            novelEntity.setName(searchResult.getBookName());
-            novelEntity.setCover(book.getCoverUrl());
-            novelEntity.setAuthor(searchResult.getAuthor());
-            String bookDir = StrUtil.format("{}({}).{}" , book.getBookName(), book.getAuthor(),config.getExtName().toLowerCase());
-            novelEntity.setDownloadUrl(config.getDownloadPath()+ File.separator+bookDir);
-
-            novelMapper.insert(novelEntity);
-            webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]完成！总耗时 %s s,请取我的书库查看",NumberUtil.round(totalTimeSeconds, 2),novelEntity.getId())));
+            webSocketMessageSender.send(session.getId(), NOVEL_DOWNLOAD_CONSOLE_MESSAGE_LISTENER, JSONUtil.toJsonStr(String.format("[i]完成！总耗时 %s s,请取我的书库查看",NumberUtil.round(totalTimeSeconds, 2),bookId)));
         } finally {
             WebSocketContext.clearSessionId();
             WebSocketContext.clearSerder();
@@ -137,5 +137,4 @@ public class NovelDownloadMessageListener implements WebSocketMessageListener<Do
     public String getType() {
         return "NovelDownloadMessageListener";
     }
-
 }
